@@ -188,10 +188,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          name: string | null
           price: number
-          square_feet: number | null
+          square_footage: number | null
           status: string | null
-          title: string
           user_id: string
         }
         Insert: {
@@ -201,10 +201,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          name?: string | null
           price: number
-          square_feet?: number | null
+          square_footage?: number | null
           status?: string | null
-          title: string
           user_id: string
         }
         Update: {
@@ -214,10 +214,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          name?: string | null
           price?: number
-          square_feet?: number | null
+          square_footage?: number | null
           status?: string | null
-          title?: string
           user_id?: string
         }
         Relationships: [
