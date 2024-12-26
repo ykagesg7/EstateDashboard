@@ -1,16 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Will implement Supabase auth later
+
     console.log("Login attempt", { email, password });
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        console.error("ログインエラー:", error.message);
+        // エラー処理を実装 (例: エラーメッセージの表示)
+      } else {
+        navigate('/properties');
+      }
+    } catch (error) {
+      console.error("予期せぬエラー:", error);
+    }
   };
 
   return (
@@ -31,6 +49,7 @@ export const LoginForm = () => {
               type="email"
               placeholder="Enter your email"
               value={email}
+              autoComplete="email"
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -46,6 +65,7 @@ export const LoginForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="current-password"
             />
           </div>
           <Button type="submit" className="w-full">
