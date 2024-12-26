@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { MaintenanceRecord } from "@/types/property";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";

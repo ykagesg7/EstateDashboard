@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Property } from "@/types/property";
 import { formatCurrency } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export const PropertyDetail = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{property.title}</h1>
+        <h1 className="text-3xl font-bold">{property.name}</h1>
         <Button>編集</Button>
       </div>
 
@@ -62,7 +62,7 @@ export const PropertyDetail = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">面積</p>
-              <p>{property.square_feet}㎡</p>
+              <p>{property.square_footage}㎡</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">ステータス</p>

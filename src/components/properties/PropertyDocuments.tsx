@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import { Document } from "@/types/property";
 import { formatDate, formatFileSize } from "@/utils/formatters";
 import { useToast } from "@/hooks/use-toast";
@@ -134,9 +134,9 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
 
       // ファイルをダウンロード
       const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
+      const a = global.document.createElement("a"); // グローバルな document を使用
       a.href = url;
-      a.download = document.name;
+      a.download = document.name; // こちらの document は props の document
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
