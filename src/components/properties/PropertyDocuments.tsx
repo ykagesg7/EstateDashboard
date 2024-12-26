@@ -81,6 +81,10 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
     try {
       setIsUploading(true);
 
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("認証が必要です");
+
       // Supabase Storageにファイルをアップロード
       const fileExt = file.name.split(".").pop();
       const filePath = `${propertyId}/${crypto.randomUUID()}.${fileExt}`;
@@ -93,6 +97,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
       // ドキュメントメタデータをデータベースに保存
       const { error: dbError } = await supabase.from("documents").insert({
         property_id: propertyId,
+        user_id: user.id,
         name: file.name,
         file_path: filePath,
         file_type: file.type,

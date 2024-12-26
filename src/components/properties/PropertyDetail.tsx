@@ -25,6 +25,7 @@ export const PropertyDetail = () => {
       if (error) throw error;
       return data as Property;
     },
+    enabled: !!id,
   });
 
   if (isLoading) return <div>読み込み中...</div>;
