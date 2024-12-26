@@ -1,15 +1,15 @@
 export interface Property {
   id: string;
   user_id: string;
-  title: string;
-  address: string;
+  name: string;
+  created_at: string;
+  description: string;
   price: number;
+  address: string;
   bedrooms: number;
   bathrooms: number;
-  square_feet: number;
-  description: string | null;
-  status: 'active' | 'inactive' | 'pending';
-  created_at: string;
+  square_footage: number;
+  status: 'active' | 'inactive' | 'pending';  
 }
 
 export interface FinancialRecord {
