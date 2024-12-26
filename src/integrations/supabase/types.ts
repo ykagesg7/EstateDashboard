@@ -9,6 +9,227 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      documents: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_type: string | null
+          id: string
+          name: string
+          property_id: string
+          size: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          name: string
+          property_id: string
+          size?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          name?: string
+          property_id?: string
+          size?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_records: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          property_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          property_id: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          property_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_records: {
+        Row: {
+          completed_date: string | null
+          cost: number | null
+          created_at: string
+          description: string | null
+          id: string
+          property_id: string
+          scheduled_date: string | null
+          status: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          property_id: string
+          scheduled_date?: string | null
+          status?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed_date?: string | null
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          property_id?: string
+          scheduled_date?: string | null
+          status?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_records_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          description: string | null
+          id: string
+          price: number
+          square_feet: number | null
+          status: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price: number
+          square_feet?: number | null
+          status?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          price?: number
+          square_feet?: number | null
+          status?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock: {
         Row: {
           created_at: string
