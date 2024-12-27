@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface PropertyDocumentsProps {
-  propertyId: string;
+  documents: Document[]; // propertyId を documents に変更
 }
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -33,20 +33,20 @@ const ALLOWED_FILE_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
-export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
+export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // ドキュメント一覧の取得
-  const { data: documents, isLoading } = useQuery({
-    queryKey: ["documents", propertyId],
+  const { data: fetchdocuments, isLoading } = useQuery({
+    queryKey: ["documents", documents],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
         .select("*")
-        .eq("property_id", propertyId)
+        .eq("property_id", documents)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -87,7 +87,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
 
       // Supabase Storageにファイルをアップロード
       const fileExt = file.name.split(".").pop();
-      const filePath = `${propertyId}/${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${documents}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
         .from("property_documents")
         .upload(filePath, file);
@@ -96,7 +96,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
 
       // ドキュメントメタデータをデータベースに保存
       const { error: dbError } = await supabase.from("documents").insert({
-        property_id: propertyId,
+        property_id: documents,
         user_id: user.id,
         name: file.name,
         file_path: filePath,
@@ -106,7 +106,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
 
       if (dbError) throw dbError;
 
-      queryClient.invalidateQueries({ queryKey: ["documents", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["documents", documents] });
       toast({
         title: "成功",
         description: "ドキュメントがアップロードされました。",
@@ -128,7 +128,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
     try {
       const { data, error } = await supabase.storage
         .from("property_documents")
-        .download(document.file_path);
+        .download(document.url);
 
       if (error) throw error;
 
@@ -155,7 +155,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
       // Storageからファイルを削除
       const { error: storageError } = await supabase.storage
         .from("property_documents")
-        .remove([document.file_path]);
+        .remove([document.url]);
 
       if (storageError) throw storageError;
 
@@ -168,7 +168,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
       if (dbError) throw dbError;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", propertyId] });
+      queryClient.invalidateQueries({ queryKey: ["documents", documents] });
       toast({
         title: "成功",
         description: "ドキュメントが削除されました。",

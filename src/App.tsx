@@ -11,6 +11,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import Finances from "./pages/Finances";
 import Settings from "./pages/Settings";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (

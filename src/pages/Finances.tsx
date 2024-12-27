@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+//import { supabase } from "@/lib/supabase";
 import {
   Table,
   TableBody,
@@ -9,26 +9,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency, formatDate } from "@/utils/formatters";
+import { dummyFinancialRecords } from "@/data/dummyFinancialRecords"; // インポートを追加
 
 const Finances = () => {
-  const { data: financials, isLoading } = useQuery({
-    queryKey: ["financials"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("financial_records")
-        .select("*")
-        .order("date", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
+  //const { data: financials, isLoading } = useQuery({
+    //queryKey: ["financials"],
+    //queryFn: async () => {
+      //const { data, error } = await supabase
+        //.from("financial_records")
+        //.select("*")
+        //.order("date", { ascending: false });
+      //if (error) throw error;
+      //return data;
+    //},
+  //});
+  const isLoading = false; // ダミーデータなのでローディングは不要
+  const financials = dummyFinancialRecords; // ダミーデータを代入
 
   if (isLoading) return <div>読み込み中...</div>;
 
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-3xl font-bold mb-6">財務管理</h1>
-      
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -54,5 +57,4 @@ const Finances = () => {
     </div>
   );
 };
-
 export default Finances;

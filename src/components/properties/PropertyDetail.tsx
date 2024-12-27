@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+// import { useQuery } from "@tanstack/react-query"; // コメントアウト
+// import { supabase } from "@/lib/supabase"; // コメントアウト
 import { Property } from "@/types/property";
 import { formatCurrency } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
@@ -9,27 +9,42 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyDocuments } from "./PropertyDocuments";
 import { PropertyFinancials } from "./PropertyFinancials";
 import { PropertyMaintenance } from "./PropertyMaintenance";
+import { dummyProperties } from "@/data/dummyProperties"; // インポート
+import { dummyFinancialRecords } from "@/data/dummyFinancialRecords"; // インポート
+import { dummyMaintenanceRecords } from "@/data/dummyMaintenanceRecords"; // インポート
+import { dummyDocuments } from "@/data/dummyDocuments"; // インポート
 
 export const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { data: property, isLoading } = useQuery({
-    queryKey: ["property", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("properties")
-        .select("*")
-        .eq("id", id)
-        .single();
+  // const { data: property, isLoading } = useQuery({ // コメントアウト
+  //   queryKey: ["property", id],
+  //   queryFn: async () => {
+  //     const { data, error } = await supabase
+  //       .from("properties")
+  //       .select("*")
+  //       .eq("id", id)
+  //       .single();
+  //
+  //     if (error) throw error;
+  //     return data as Property;
+  //   },
+  //   enabled: !!id,
+  // });
 
-      if (error) throw error;
-      return data as Property;
-    },
-    enabled: !!id,
-  });
+  const property = dummyProperties.find((p) => p.id === id); // ダミーデータから物件を検索
+  const isLoading = !property; // ダミーデータなので、物件が見つからない場合をローディングとみなす
 
   if (isLoading) return <div>読み込み中...</div>;
   if (!property) return <div>物件が見つかりません</div>;
+
+  const financialRecords = dummyFinancialRecords.filter(
+    (record) => record.property_id === property.id
+  );
+  const maintenanceRecords = dummyMaintenanceRecords.filter(
+    (record) => record.property_id === property.id
+  );
+  const documents = dummyDocuments.filter((doc) => doc.property_id === property.id);
 
   return (
     <div className="space-y-6">
@@ -79,13 +94,13 @@ export const PropertyDetail = () => {
           <TabsTrigger value="documents">書類</TabsTrigger>
         </TabsList>
         <TabsContent value="financials">
-          <PropertyFinancials propertyId={property.id} />
+          <PropertyFinancials financials={financialRecords} /> {/* ダミーデータを渡す */}
         </TabsContent>
         <TabsContent value="maintenance">
-          <PropertyMaintenance propertyId={property.id} />
+          <PropertyMaintenance maintenanceRecords={maintenanceRecords} /> {/* ダミーデータを渡す */}
         </TabsContent>
         <TabsContent value="documents">
-          <PropertyDocuments propertyId={property.id} />
+          <PropertyDocuments documents={documents} /> {/* ダミーデータを渡す */}
         </TabsContent>
       </Tabs>
     </div>

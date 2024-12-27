@@ -3,10 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-
 const Settings = () => {
   const { toast } = useToast();
-
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -22,7 +20,6 @@ const Settings = () => {
       });
     }
   };
-
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-3xl font-bold mb-6">設定</h1>
@@ -42,5 +39,4 @@ const Settings = () => {
     </div>
   );
 };
-
 export default Settings;

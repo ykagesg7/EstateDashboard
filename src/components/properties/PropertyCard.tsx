@@ -17,10 +17,10 @@ export const PropertyCard = ({ property, onClick }: PropertyCardProps) => {
       <CardHeader>
         <CardTitle className="text-lg">{property.name}</CardTitle>
         <Badge className={clsx(
-            property.status === 'pending' && "bg-yellow-500 text-white",
-            property.status === 'inactive' && "bg-gray-500 text-white",
+            property.status === '検討中' && "bg-yellow-500 text-white",
+            property.status === '契約済' && "bg-gray-500 text-white",
           )}
-          variant={property.status === 'active' ? 'default' : 'secondary'}
+          variant={property.status === '運用中' ? 'default' : 'secondary'}
         >
           {property.status}
         </Badge>

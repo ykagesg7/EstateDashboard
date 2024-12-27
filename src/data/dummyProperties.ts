@@ -12,7 +12,7 @@ export const dummyProperties: Property[] = [
     bedrooms: 4,
     bathrooms: 2,
     square_footage: 150,
-    status: "active",
+    status: "運用中",
   },
   {
     id: "2",
@@ -25,7 +25,7 @@ export const dummyProperties: Property[] = [
     bedrooms: 1,
     bathrooms: 1,
     square_footage: 55,
-    status: "active",
+    status: "運用中",
   },
   {
     id: "3",
@@ -38,7 +38,7 @@ export const dummyProperties: Property[] = [
     bedrooms: 3,
     bathrooms: 2,
     square_footage: 100,
-    status: "pending",
+    status: "検討中",
   },
   {
     id: "4",
@@ -51,7 +51,7 @@ export const dummyProperties: Property[] = [
     bedrooms: 2,
     bathrooms: 1,
     square_footage: 80,
-    status: "inactive",
+    status: "契約済",
   },
   {
     id: "5",
@@ -64,6 +64,6 @@ export const dummyProperties: Property[] = [
     bedrooms: 3,
     bathrooms: 1,
     square_footage: 130,
-    status: "active",
+    status: "運用中",
   },
 ];

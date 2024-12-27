@@ -6,17 +6,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface PropertyMaintenanceProps {
-  propertyId: string;
+  maintenanceRecords: MaintenanceRecord[]; // propertyId を maintenanceRecords に変更
 }
 
-export const PropertyMaintenance = ({ propertyId }: PropertyMaintenanceProps) => {
+export const PropertyMaintenance = ({ maintenanceRecords }: PropertyMaintenanceProps) => {
   const { data: maintenance, isLoading } = useQuery({
-    queryKey: ["maintenance", propertyId],
+    queryKey: ["maintenance", maintenanceRecords],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maintenance_records")
         .select("*")
-        .eq("property_id", propertyId)
+        .eq("property_id", maintenanceRecords)
         .order("scheduled_date", { ascending: false });
 
       if (error) throw error;

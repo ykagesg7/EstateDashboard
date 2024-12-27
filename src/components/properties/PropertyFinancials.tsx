@@ -5,17 +5,17 @@ import { formatCurrency, formatDate } from "@/utils/formatters";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface PropertyFinancialsProps {
-  propertyId: string;
+  financials: FinancialRecord[]; // propertyId を financials に変更
 }
 
-export const PropertyFinancials = ({ propertyId }: PropertyFinancialsProps) => {
-  const { data: financials, isLoading } = useQuery({
-    queryKey: ["financials", propertyId],
+export const PropertyFinancials = ({ financials }: PropertyFinancialsProps) => {
+  const { data: fetchfinancials, isLoading } = useQuery({
+    queryKey: ["financials", financials],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("financial_records")
         .select("*")
-        .eq("property_id", propertyId)
+        .eq("property_id", financials)
         .order("date", { ascending: false });
 
       if (error) throw error;

@@ -9,7 +9,7 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   square_footage: number;
-  status: 'active' | 'inactive' | 'pending';  
+  status: '検討中' | '運用中' | '契約済'
 }
 
 export interface FinancialRecord {
@@ -41,7 +41,7 @@ export interface Document {
   property_id: string;
   user_id: string;
   name: string;
-  file_path: string;
+  url: string; // file_path を url に変更
   file_type: string | null;
   size: number | null;
   created_at: string;
