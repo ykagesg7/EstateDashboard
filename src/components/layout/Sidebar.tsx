@@ -1,22 +1,20 @@
-import { Home, Building, DollarSign, Settings, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Home, Building, DollarSign, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { icon: Home, label: "Dashboard", href: "/" },
-  { icon: Building, label: "Properties", href: "/properties" },
-  { icon: DollarSign, label: "Finances", href: "/finances" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: Home, label: "ダッシュボード", href: "/dashboard" },
+  { icon: Building, label: "物件一覧", href: "/properties" },
+  { icon: DollarSign, label: "財務管理", href: "/finances" },
+  { icon: Settings, label: "設定", href: "/settings" },
 ];
 
 export const AppSidebar = () => {
@@ -32,10 +30,10 @@ export const AppSidebar = () => {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild>
-                    <a href={item.href} className="flex items-center gap-2">
+                    <Link to={item.href} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
