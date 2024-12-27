@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyDocuments } from "./PropertyDocuments";
 import { PropertyFinancials } from "./PropertyFinancials";
 import { PropertyMaintenance } from "./PropertyMaintenance";
+import { PropertySimulation } from "./simulations/PropertySimulation";
 import { dummyProperties } from "@/data/dummyProperties";
 import { dummyFinancialRecords } from "@/data/dummyFinancialRecords";
 import { dummyMaintenanceRecords } from "@/data/dummyMaintenanceRecords";
@@ -19,34 +20,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
-// チェックリストの項目を定義
 const CHECKLIST_ITEMS = [
   { id: "investigation", label: "物件の調査" },
   { id: "financial", label: "資金計画の確認" },
   { id: "contract", label: "契約書の確認" },
 ];
 
-// ステータスの選択肢を定義
 const STATUS_OPTIONS: Property["status"][] = ["検討中", "運用中", "契約済"];
 
 export const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
 
-  // 状態管理
   const [property, setProperty] = useState<Property | null>(null);
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [memo, setMemo] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // 初期データの読み込み
   useEffect(() => {
     if (id) {
       const propertyData = dummyProperties.find((p) => p.id === id);
       if (propertyData) {
         setProperty(propertyData);
         
-        // ローカルストレージからチェックリストとメモを復元
         const savedChecklist = localStorage.getItem(`checklist-${id}`);
         const savedMemo = localStorage.getItem(`memo-${id}`);
         
@@ -60,21 +56,18 @@ export const PropertyDetail = () => {
     }
   }, [id]);
 
-  // チェックリストの変更を保存
   useEffect(() => {
     if (id) {
       localStorage.setItem(`checklist-${id}`, JSON.stringify(checklist));
     }
   }, [checklist, id]);
 
-  // メモの変更を保存
   useEffect(() => {
     if (id) {
       localStorage.setItem(`memo-${id}`, memo);
     }
   }, [memo, id]);
 
-  // ステータス更新処理
   const handleStatusChange = async (newStatus: Property["status"]) => {
     if (!property || !id) return;
 
@@ -172,39 +165,46 @@ export const PropertyDetail = () => {
           </CardContent>
         </Card>
 
-        {/* チェックリストとメモカード */}
-        <Card>
-          <CardHeader>
-            <CardTitle>購入判断チェックリスト</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              {CHECKLIST_ITEMS.map((item) => (
-                <div key={item.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={item.id}
-                    checked={checklist[item.id] || false}
-                    onCheckedChange={(checked) =>
-                      setChecklist((prev) => ({ ...prev, [item.id]: checked === true }))
-                    }
-                  />
-                  <Label htmlFor={item.id}>{item.label}</Label>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="memo">メモ</Label>
-              <Textarea
-                id="memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="物件に関するメモを入力してください"
-                className="min-h-[100px]"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* チェックリストとメモカード - 検討中の物件のみ表示 */}
+        {property.status === "検討中" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>購入判断チェックリスト</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                {CHECKLIST_ITEMS.map((item) => (
+                  <div key={item.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={item.id}
+                      checked={checklist[item.id] || false}
+                      onCheckedChange={(checked) =>
+                        setChecklist((prev) => ({ ...prev, [item.id]: checked === true }))
+                      }
+                    />
+                    <Label htmlFor={item.id}>{item.label}</Label>
+                  </div>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="memo">メモ</Label>
+                <Textarea
+                  id="memo"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="物件に関するメモを入力してください"
+                  className="min-h-[100px]"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* シミュレーション - 検討中の物件のみ表示 */}
+      {property.status === "検討中" && (
+        <PropertySimulation propertyPrice={property.price} />
+      )}
 
       <Tabs defaultValue="financials">
         <TabsList>
