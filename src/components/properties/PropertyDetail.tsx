@@ -1,6 +1,4 @@
 import { useParams } from "react-router-dom";
-// import { useQuery } from "@tanstack/react-query"; // コメントアウト
-// import { supabase } from "@/lib/supabase"; // コメントアウト
 import { Property } from "@/types/property";
 import { formatCurrency } from "@/utils/formatters";
 import { Button } from "@/components/ui/button";
@@ -9,33 +7,103 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyDocuments } from "./PropertyDocuments";
 import { PropertyFinancials } from "./PropertyFinancials";
 import { PropertyMaintenance } from "./PropertyMaintenance";
-import { dummyProperties } from "@/data/dummyProperties"; // インポート
-import { dummyFinancialRecords } from "@/data/dummyFinancialRecords"; // インポート
-import { dummyMaintenanceRecords } from "@/data/dummyMaintenanceRecords"; // インポート
-import { dummyDocuments } from "@/data/dummyDocuments"; // インポート
+import { dummyProperties } from "@/data/dummyProperties";
+import { dummyFinancialRecords } from "@/data/dummyFinancialRecords";
+import { dummyMaintenanceRecords } from "@/data/dummyMaintenanceRecords";
+import { dummyDocuments } from "@/data/dummyDocuments";
+import { useState, useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+
+// チェックリストの項目を定義
+const CHECKLIST_ITEMS = [
+  { id: "investigation", label: "物件の調査" },
+  { id: "financial", label: "資金計画の確認" },
+  { id: "contract", label: "契約書の確認" },
+];
+
+// ステータスの選択肢を定義
+const STATUS_OPTIONS: Property["status"][] = ["検討中", "運用中", "契約済"];
 
 export const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
 
-  // const { data: property, isLoading } = useQuery({ // コメントアウト
-  //   queryKey: ["property", id],
-  //   queryFn: async () => {
-  //     const { data, error } = await supabase
-  //       .from("properties")
-  //       .select("*")
-  //       .eq("id", id)
-  //       .single();
-  //
-  //     if (error) throw error;
-  //     return data as Property;
-  //   },
-  //   enabled: !!id,
-  // });
+  // 状態管理
+  const [property, setProperty] = useState<Property | null>(null);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const [memo, setMemo] = useState<string>("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const property = dummyProperties.find((p) => p.id === id); // ダミーデータから物件を検索
-  const isLoading = !property; // ダミーデータなので、物件が見つからない場合をローディングとみなす
+  // 初期データの読み込み
+  useEffect(() => {
+    if (id) {
+      const propertyData = dummyProperties.find((p) => p.id === id);
+      if (propertyData) {
+        setProperty(propertyData);
+        
+        // ローカルストレージからチェックリストとメモを復元
+        const savedChecklist = localStorage.getItem(`checklist-${id}`);
+        const savedMemo = localStorage.getItem(`memo-${id}`);
+        
+        if (savedChecklist) {
+          setChecklist(JSON.parse(savedChecklist));
+        }
+        if (savedMemo) {
+          setMemo(savedMemo);
+        }
+      }
+    }
+  }, [id]);
 
-  if (isLoading) return <div>読み込み中...</div>;
+  // チェックリストの変更を保存
+  useEffect(() => {
+    if (id) {
+      localStorage.setItem(`checklist-${id}`, JSON.stringify(checklist));
+    }
+  }, [checklist, id]);
+
+  // メモの変更を保存
+  useEffect(() => {
+    if (id) {
+      localStorage.setItem(`memo-${id}`, memo);
+    }
+  }, [memo, id]);
+
+  // ステータス更新処理
+  const handleStatusChange = async (newStatus: Property["status"]) => {
+    if (!property || !id) return;
+
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase
+        .from("properties")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      setProperty({ ...property, status: newStatus });
+      toast({
+        title: "ステータスを更新しました",
+        description: `新しいステータス: ${newStatus}`,
+      });
+    } catch (error) {
+      console.error("Status update error:", error);
+      toast({
+        title: "エラー",
+        description: "ステータスの更新に失敗しました",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   if (!property) return <div>物件が見つかりません</div>;
 
   const financialRecords = dummyFinancialRecords.filter(
@@ -53,39 +121,90 @@ export const PropertyDetail = () => {
         <Button>編集</Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>基本情報</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">住所</p>
-              <p>{property.address}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 基本情報カード */}
+        <Card>
+          <CardHeader>
+            <CardTitle>基本情報</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">住所</p>
+                <p>{property.address}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">価格</p>
+                <p className="text-xl font-bold">{formatCurrency(property.price)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">寝室</p>
+                <p>{property.bedrooms}部屋</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">バスルーム</p>
+                <p>{property.bathrooms}部屋</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">面積</p>
+                <p>{property.square_footage}㎡</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">ステータス</p>
+                <Select
+                  value={property.status}
+                  onValueChange={(value: Property["status"]) => handleStatusChange(value)}
+                  disabled={isUpdating}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue>{property.status}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">価格</p>
-              <p className="text-xl font-bold">{formatCurrency(property.price)}</p>
+          </CardContent>
+        </Card>
+
+        {/* チェックリストとメモカード */}
+        <Card>
+          <CardHeader>
+            <CardTitle>購入判断チェックリスト</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              {CHECKLIST_ITEMS.map((item) => (
+                <div key={item.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={item.id}
+                    checked={checklist[item.id] || false}
+                    onCheckedChange={(checked) =>
+                      setChecklist((prev) => ({ ...prev, [item.id]: checked === true }))
+                    }
+                  />
+                  <Label htmlFor={item.id}>{item.label}</Label>
+                </div>
+              ))}
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">寝室</p>
-              <p>{property.bedrooms}部屋</p>
+            <div className="space-y-2">
+              <Label htmlFor="memo">メモ</Label>
+              <Textarea
+                id="memo"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="物件に関するメモを入力してください"
+                className="min-h-[100px]"
+              />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">バスルーム</p>
-              <p>{property.bathrooms}部屋</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">面積</p>
-              <p>{property.square_footage}㎡</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">ステータス</p>
-              <p>{property.status}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       <Tabs defaultValue="financials">
         <TabsList>
@@ -94,13 +213,13 @@ export const PropertyDetail = () => {
           <TabsTrigger value="documents">書類</TabsTrigger>
         </TabsList>
         <TabsContent value="financials">
-          <PropertyFinancials financials={financialRecords} /> {/* ダミーデータを渡す */}
+          <PropertyFinancials financials={financialRecords} />
         </TabsContent>
         <TabsContent value="maintenance">
-          <PropertyMaintenance maintenanceRecords={maintenanceRecords} /> {/* ダミーデータを渡す */}
+          <PropertyMaintenance maintenanceRecords={maintenanceRecords} />
         </TabsContent>
         <TabsContent value="documents">
-          <PropertyDocuments documents={documents} /> {/* ダミーデータを渡す */}
+          <PropertyDocuments documents={documents} />
         </TabsContent>
       </Tabs>
     </div>
