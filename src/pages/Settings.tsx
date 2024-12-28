@@ -3,8 +3,11 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { ProfileForm } from "@/components/auth/ProfileForm";
+
 const Settings = () => {
   const { toast } = useToast();
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -20,11 +23,14 @@ const Settings = () => {
       });
     }
   };
+
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-3xl font-bold mb-6">設定</h1>
       
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6">
+        <ProfileForm />
+        
         <Card>
           <CardHeader>
             <CardTitle>アカウント設定</CardTitle>
@@ -39,4 +45,5 @@ const Settings = () => {
     </div>
   );
 };
+
 export default Settings;
