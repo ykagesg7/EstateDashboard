@@ -22,7 +22,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 
-type PropertyFormData = Omit<Property, "id" | "user_id" | "created_at">;
+type PropertyFormData = Omit<Property, "id" | "created_at">;
 
 interface PropertyFormProps {
   property?: Property;
@@ -45,6 +45,7 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           bathrooms: property.bathrooms,
           square_footage: property.square_footage,
           status: property.status,
+          user_id: property.user_id,
         }
       : {
           name: "",
@@ -55,16 +56,30 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           bathrooms: 1,
           square_footage: 0,
           status: "検討中",
+          user_id: "",
         },
   });
 
   const onSubmit = async (data: PropertyFormData) => {
     setIsSubmitting(true);
     try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const propertyData = {
+        ...data,
+        user_id: user.id,
+      };
+
       if (property) {
         const { error } = await supabase
           .from("properties")
-          .update(data)
+          .update(propertyData)
           .eq("id", property.id);
 
         if (error) throw error;
@@ -73,7 +88,7 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           title: "物件情報を更新しました",
         });
       } else {
-        const { error } = await supabase.from("properties").insert([data]);
+        const { error } = await supabase.from("properties").insert([propertyData]);
 
         if (error) throw error;
 
