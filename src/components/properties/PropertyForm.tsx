@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Property } from "@/types/property";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ interface PropertyFormProps {
 }
 
 export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProps) => {
+  const [isUserLoading, setIsUserLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,6 +61,24 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           user_id: "",
         },
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsUserLoading(false);
+      setIsAuthenticated(!!user);
+    };
+
+    checkAuth();
+  }, []);
+
+  if (isUserLoading) {
+    return <div>Loading...</div>; // ローディングインジケーター
+  }
+
+  if (!isAuthenticated) {
+    return <div>認証が必要です。</div>; // 認証されていない場合のメッセージ
+  }
 
   const onSubmit = async (data: PropertyFormData) => {
     setIsSubmitting(true);
