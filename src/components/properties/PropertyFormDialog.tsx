@@ -5,8 +5,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Property } from "@/types/property";
 import { PropertyForm } from "./PropertyForm";
+import { Tables } from "@/integrations/supabase/types";
+type Property = Tables<'properties'>;
 
 interface PropertyFormDialogProps {
   property?: Property;
@@ -28,7 +29,7 @@ export const PropertyFormDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl overflow-y-auto max-h-[70vh]">
         <DialogHeader>
           <DialogTitle>{property ? "物件を編集" : "物件を登録"}</DialogTitle>
           <DialogDescription>
