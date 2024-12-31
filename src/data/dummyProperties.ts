@@ -13,11 +13,13 @@ export const dummyProperties: Property[] = [
     bathrooms: 2,
     square_footage: 150,
     status: "運用中",
+    latitude: 35.4513,
+    longitude: 139.6315,
   },
   {
     id: "2",
     user_id: "user-B",
-    created_at: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(), // 3日前の日付
+    created_at: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(),
     name: "代官山のデザイナーズマンション",
     description: "代官山駅から徒歩 5 分の好立地にある、洗練されたデザインのマンションです。シングルやカップルに最適です。",
     price: 62000000,
@@ -26,11 +28,13 @@ export const dummyProperties: Property[] = [
     bathrooms: 1,
     square_footage: 55,
     status: "運用中",
+    latitude: 35.6500,
+    longitude: 139.7033,
   },
   {
     id: "3",
     user_id: "user-C",
-    created_at: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(), // 7日前の日付
+    created_at: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
     name: "豊洲のタワーマンション",
     description: "豊洲のランドマークタワーにある、眺望が自慢のマンションです。夜景は息をのむ美しさです。",
     price: 120000000,
@@ -39,11 +43,13 @@ export const dummyProperties: Property[] = [
     bathrooms: 2,
     square_footage: 100,
     status: "検討中",
+    latitude: 35.6551,
+    longitude: 139.7967,
   },
   {
     id: "4",
     user_id: "user-D",
-    created_at: new Date(new Date().setDate(new Date().getDate() - 14)).toISOString(), // 14日前の日付
+    created_at: new Date(new Date().setDate(new Date().getDate() - 14)).toISOString(),
     name: "自由が丘のペット可テラスハウス",
     description: "ペットと一緒に暮らせる、緑豊かな自由が丘のテラスハウスです。専用庭付きで、ペットも快適に過ごせます。",
     price: 78000000,
@@ -52,11 +58,13 @@ export const dummyProperties: Property[] = [
     bathrooms: 1,
     square_footage: 80,
     status: "契約済",
+    latitude: 35.6076,
+    longitude: 139.6689,
   },
   {
     id: "5",
     user_id: "user-E",
-    created_at: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(), // 30日前の日付
+    created_at: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
     name: "鎌倉のリノベーション古民家",
     description: "趣のある古民家を современный にリノベーションしました。落ち着いた雰囲気の中で、ゆったりとした時間を過ごしたい方におすすめです。",
     price: 95000000,
@@ -65,5 +73,7 @@ export const dummyProperties: Property[] = [
     bathrooms: 1,
     square_footage: 130,
     status: "運用中",
+    latitude: 35.3192,
+    longitude: 139.5506,
   },
 ];

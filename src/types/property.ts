@@ -14,6 +14,30 @@ export interface Property {
   longitude: number | null;
 }
 
+export interface Document {
+  id: string;
+  property_id: string;
+  user_id: string;
+  name: string;
+  url: string;
+  file_type: string;
+  size: number;
+  created_at: string;
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  property_id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  scheduled_date: string | null;
+  completed_date: string | null;
+  cost: number | null;
+  created_at: string;
+}
+
 export interface FinancialRecord {
   id: string;
   property_id: string;
