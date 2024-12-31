@@ -11,7 +11,9 @@ import { Loader2, Trash2, Upload, Download } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const ALLOWED_FILE_TYPES = ["image/png", "image/jpeg", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-const MAX_FILE_SIZE = 20 1024 1024; // 20MB
+const MAX_FILE_SIZE_MB = 20;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // 20MB
+
 interface PropertyDocumentsProps {
 propertyId: string;
 }
@@ -56,7 +58,7 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
     if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "エラー",
-        description: "ファイルサイズは20MB以下にしてください。",
+        description: `ファイルサイズは${MAX_FILE_SIZE_MB}MB以下にしてください。`,
         variant: "destructive",
       });
       return;
@@ -85,8 +87,10 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
       });
 
       // キャッシュの更新
-      queryClient.invalidateQueries(["documents", propertyId]);
+      queryClient.invalidateQueries({ queryKey: ["documents", propertyId] });
+
     } catch (error: any) {
+
       toast({
         title: "エラー",
         description: "書類のアップロードに失敗しました: " + error.message,
@@ -102,32 +106,39 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
     try {
       const { data, error } = await supabase.storage
         .from("property-documents")
-        .download(document.path);
-      if (error) throw error;
+        .download(document.url);
+      if (error) {
+        toast({
+          title: "ダウンロードエラー",
+          description: `書類のダウンロードに失敗しました: ${error.message}`,
+          variant: "destructive",
+        });
+        return; // エラー発生時に処理を中断
+      }
 
       const url = window.URL.createObjectURL(data);
-      const a = document.createElement("a");
+      const a = window.document.createElement("a");
       a.href = url;
       a.download = document.name;
-      document.body.appendChild(a);
+      window.document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      window.document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       toast({
-        title: "エラー",
-        description: "書類のダウンロードに失敗しました: " + error.message,
+        title: "ダウンロードエラー",
+        description: `書類のダウンロードに失敗しました: ${error.message}`,
         variant: "destructive",
       });
     }
   };
 
   // ファイル削除処理
-  const deleteMutation = useMutation(
-    async (document: Document) => {
+  const deleteMutation = useMutation({
+    mutationFn: async (document: Document) => {
       const { error } = await supabase.storage
         .from("property-documents")
-        .remove([document.path]);
+        .remove([document.url]);
       if (error) throw error;
 
       const { error: dbError } = await supabase
@@ -136,23 +147,21 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
         .eq("id", document.id);
       if (dbError) throw dbError;
     },
-    {
-      onSuccess: () => {
-        toast({
-          title: "削除成功",
-          description: "書類が正常に削除されました。",
-        });
-        queryClient.invalidateQueries(["documents", propertyId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: "エラー",
-          description: "書類の削除に失敗しました: " + error.message,
-          variant: "destructive",
-        });
-      },
-    }
-  );
+    onSuccess: () => {
+      toast({
+        title: "削除成功",
+        description: "書類が正常に削除されました。",
+      });
+      queryClient.invalidateQueries({ queryKey: ["documents", propertyId] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "エラー",
+        description: "書類の削除に失敗しました: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (isLoading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   if (error) return <div>書類の読み込みに失敗しました</div>;
