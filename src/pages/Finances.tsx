@@ -1,60 +1,48 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-//import { supabase } from "@/lib/supabase";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatCurrency, formatDate } from "@/utils/formatters";
-import { dummyFinancialRecords } from "@/data/dummyFinancialRecords"; // インポートを追加
+import { supabase } from "@/lib/supabase";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CashflowReport } from "@/components/finances/CashflowReport";
+import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Finances = () => {
-  //const { data: financials, isLoading } = useQuery({
-    //queryKey: ["financials"],
-    //queryFn: async () => {
-      //const { data, error } = await supabase
-        //.from("financial_records")
-        //.select("*")
-        //.order("date", { ascending: false });
-      //if (error) throw error;
-      //return data;
-    //},
-  //});
-  const isLoading = false; // ダミーデータなのでローディングは不要
-  const financials = dummyFinancialRecords; // ダミーデータを代入
-
-  if (isLoading) return <div>読み込み中...</div>;
+  const isMobile = useIsMobile();
+  const [selectedView, setSelectedView] = useState("cashflow");
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">財務管理</h1>
+    <div className="container mx-auto py-6 px-4 md:px-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-0">財務管理</h1>
+        <div className="w-full md:w-auto">
+          <Tabs
+            value={selectedView}
+            onValueChange={setSelectedView}
+            className="w-full md:w-auto"
+          >
+            <TabsList className="w-full md:w-auto grid grid-cols-2 md:flex">
+              <TabsTrigger value="cashflow" className="flex-1 md:flex-none">
+                キャッシュフロー
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex-1 md:flex-none">
+                レポート
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>日付</TableHead>
-              <TableHead>種類</TableHead>
-              <TableHead>金額</TableHead>
-              <TableHead>説明</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {financials?.map((record) => (
-              <TableRow key={record.id}>
-                <TableCell>{formatDate(record.date)}</TableCell>
-                <TableCell>{record.type}</TableCell>
-                <TableCell>{formatCurrency(record.amount)}</TableCell>
-                <TableCell>{record.description}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <div className="space-y-6">
+        <TabsContent value="cashflow" className="m-0">
+          <CashflowReport />
+        </TabsContent>
+        <TabsContent value="reports" className="m-0">
+          {/* レポート機能は次のフェーズで実装予定 */}
+          <div>レポート機能は開発中です</div>
+        </TabsContent>
       </div>
     </div>
   );
 };
+
 export default Finances;

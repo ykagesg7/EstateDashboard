@@ -9,7 +9,9 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   square_footage: number;
-  status: '検討中' | '運用中' | '契約済'
+  status: '検討中' | '運用中' | '契約済';
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export interface FinancialRecord {
@@ -23,26 +25,34 @@ export interface FinancialRecord {
   created_at: string;
 }
 
-export interface MaintenanceRecord {
+export interface RentalPlan {
   id: string;
   property_id: string;
   user_id: string;
-  title: string;
-  description: string | null;
-  status: 'pending' | 'in_progress' | 'completed';
-  scheduled_date: string | null;
-  completed_date: string | null;
-  cost: number | null;
+  monthly_rent: number;
+  start_date: string;
+  end_date: string | null;
   created_at: string;
 }
 
-export interface Document {
+export interface ExpensePlan {
   id: string;
   property_id: string;
   user_id: string;
-  name: string;
-  url: string; // file_path を url に変更
-  file_type: string | null;
-  size: number | null;
+  expense_type: string;
+  amount: number;
+  frequency: 'monthly' | 'yearly';
+  start_date: string;
+  end_date: string | null;
   created_at: string;
+}
+
+export interface MonthlyCashflow {
+  property_id: string;
+  property_name: string;
+  user_id: string;
+  month: string;
+  rental_income: number;
+  expenses: number;
+  net_cashflow: number;
 }
