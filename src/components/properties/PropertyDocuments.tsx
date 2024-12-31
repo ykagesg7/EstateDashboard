@@ -8,50 +8,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Loader2, Trash2, Upload, Download } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
+const ALLOWED_FILE_TYPES = ["image/png", "image/jpeg", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+const MAX_FILE_SIZE = 20 1024 1024; // 20MB
 interface PropertyDocumentsProps {
-  documents: Document[]; // propertyId を documents に変更
+propertyId: string;
 }
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-const ALLOWED_FILE_TYPES = [
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-
-export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
+export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // ドキュメント一覧の取得
-  const { data: fetchdocuments, isLoading } = useQuery({
-    queryKey: ["documents", documents],
+  const { data: documents, isLoading, error } = useQuery({
+    queryKey: ["documents", propertyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
         .select("*")
-        .eq("property_id", documents)
+        .eq("property_id", propertyId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as Document[];
     },
+    enabled: !!propertyId,
   });
 
   // ファイルアップロード処理
@@ -87,35 +71,25 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
 
       // Supabase Storageにファイルをアップロード
       const fileExt = file.name.split(".").pop();
-      const filePath = `${documents}/${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${propertyId}/${crypto.randomUUID()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage
-        .from("property_documents")
+        .from("property-documents")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // ドキュメントメタデータをデータベースに保存
-      const { error: dbError } = await supabase.from("documents").insert({
-        property_id: documents,
-        user_id: user.id,
-        name: file.name,
-        file_path: filePath,
-        file_type: file.type,
-        size: file.size,
-      });
-
-      if (dbError) throw dbError;
-
-      queryClient.invalidateQueries({ queryKey: ["documents", documents] });
+      // アップロード成功のトースト
       toast({
-        title: "成功",
-        description: "ドキュメントがアップロードされました。",
+        title: "アップロード成功",
+        description: "書類が正常にアップロードされました。",
       });
-    } catch (error) {
-      console.error("Upload error:", error);
+
+      // キャッシュの更新
+      queryClient.invalidateQueries(["documents", propertyId]);
+    } catch (error: any) {
       toast({
         title: "エラー",
-        description: "ドキュメントのアップロードに失敗しました。",
+        description: "書類のアップロードに失敗しました: " + error.message,
         variant: "destructive",
       });
     } finally {
@@ -127,71 +101,61 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
   const handleDownload = async (document: Document) => {
     try {
       const { data, error } = await supabase.storage
-        .from("property_documents")
-        .download(document.url);
-
+        .from("property-documents")
+        .download(document.path);
       if (error) throw error;
 
-      // ファイルをダウンロード
-      const url = URL.createObjectURL(data);
-      const a = global.document.createElement("a"); // グローバルな document を使用
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement("a");
       a.href = url;
-      a.download = document.name; // こちらの document は props の document
+      a.download = document.name;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download error:", error);
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
       toast({
         title: "エラー",
-        description: "ドキュメントのダウンロードに失敗しました。",
+        description: "書類のダウンロードに失敗しました: " + error.message,
         variant: "destructive",
       });
     }
   };
 
-  // ドキュメント削除処理
-  const deleteMutation = useMutation({
-    mutationFn: async (document: Document) => {
-      // Storageからファイルを削除
-      const { error: storageError } = await supabase.storage
-        .from("property_documents")
-        .remove([document.url]);
+  // ファイル削除処理
+  const deleteMutation = useMutation(
+    async (document: Document) => {
+      const { error } = await supabase.storage
+        .from("property-documents")
+        .remove([document.path]);
+      if (error) throw error;
 
-      if (storageError) throw storageError;
-
-      // データベースからメタデータを削除
       const { error: dbError } = await supabase
         .from("documents")
         .delete()
         .eq("id", document.id);
-
       if (dbError) throw dbError;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", documents] });
-      toast({
-        title: "成功",
-        description: "ドキュメントが削除されました。",
-      });
-      setSelectedDocument(null);
-    },
-    onError: (error) => {
-      console.error("Delete error:", error);
-      toast({
-        title: "エラー",
-        description: "ドキュメントの削除に失敗しました。",
-        variant: "destructive",
-      });
-    },
-  });
+    {
+      onSuccess: () => {
+        toast({
+          title: "削除成功",
+          description: "書類が正常に削除されました。",
+        });
+        queryClient.invalidateQueries(["documents", propertyId]);
+      },
+      onError: (error: any) => {
+        toast({
+          title: "エラー",
+          description: "書類の削除に失敗しました: " + error.message,
+          variant: "destructive",
+        });
+      },
+    }
+  );
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (error) return <div>書類の読み込みに失敗しました</div>;
 
   return (
     <Card>
@@ -213,7 +177,7 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
             アップロード
           </Button>
         </div>
-      </CardHeader>
+      </CardHeader >
       <CardContent>
         <div className="space-y-4">
           {documents?.map((document) => (
@@ -222,11 +186,11 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
               className="flex items-center justify-between p-4 border rounded"
             >
               <div>
-                <p className="font-medium">{document.name}</p>
+                <p className="font-medium">{document.name}</p >
                 <p className="text-sm text-muted-foreground">
                   {formatDate(document.created_at)} -{" "}
                   {formatFileSize(document.size || 0)}
-                </p>
+                </p >
               </div>
               <div className="flex gap-2">
                 <Button
@@ -245,16 +209,16 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
-                  </AlertDialogTrigger>
+                  </AlertDialogTrigger >
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>
                         本当にこの書類を削除しますか？
-                      </AlertDialogTitle>
+                      </AlertDialogTitle >
                       <AlertDialogDescription>
                         この操作は取り消すことができません。
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
+                      </AlertDialogDescription >
+                    </AlertDialogHeader >
                     <AlertDialogFooter>
                       <AlertDialogCancel>キャンセル</AlertDialogCancel>
                       <AlertDialogAction
@@ -266,10 +230,10 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                       >
                         削除
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </AlertDialogAction >
+                    </AlertDialogFooter >
+                  </AlertDialogContent >
+                </AlertDialog >
               </div>
             </div>
           ))}
@@ -279,7 +243,7 @@ export const PropertyDocuments = ({ documents }: PropertyDocumentsProps) => {
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      </CardContent >
+    </Card >
   );
 };

@@ -142,10 +142,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
       >
         {filteredProperties.map((property) => (
           <div key={property.id} className="group relative">
-            <PropertyCard
-              property={property}
-              onClick={() => navigate(`/properties/${property.id}`)}
-            />
+            <PropertyCard property={property} /> {/* onClick プロパティを削除 */}
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button
                 variant="outline"
