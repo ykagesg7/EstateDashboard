@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { Property } from "@/types/property";
 import { PropertyList } from "@/components/properties/PropertyList";
 import { PropertyMap } from "@/components/properties/PropertyMap";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tables } from "@/integrations/supabase/types";
+type Property = Tables<'properties'>;
 
 const Properties = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -29,21 +30,21 @@ const Properties = () => {
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-3xl font-bold mb-6">物件一覧</h1>
-      
+
       <Tabs defaultValue="list" className="mb-6">
         <TabsList>
           <TabsTrigger value="list">リスト表示</TabsTrigger>
           <TabsTrigger value="map">マップ表示</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="list">
-          <PropertyList
-            properties={properties || []}
-            isLoading={isLoading}
-            onRefresh={() => refetch()}
-          />
+        <PropertyList
+          properties={(properties || []).map(prop => ({ ...prop, status: prop.status as "検討中" | "運用中" | "契約済" }))}
+          isLoading={isLoading}
+          onRefresh={() => refetch()}
+        />
         </TabsContent>
-        
+
         <TabsContent value="map">
           <PropertyMap
             properties={properties || []}
