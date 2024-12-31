@@ -48,6 +48,8 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           square_footage: property.square_footage,
           status: property.status,
           user_id: property.user_id,
+          latitude: property.latitude,
+          longitude: property.longitude,
         }
       : {
           name: "",
@@ -59,6 +61,8 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           square_footage: 0,
           status: "検討中",
           user_id: "",
+          latitude: null,
+          longitude: null,
         },
   });
 
@@ -270,6 +274,8 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
             </FormItem>
           )}
         />
+        
+        <LocationInput form={form} />
 
         <div className="flex justify-end gap-4">
           <Button type="button" variant="outline" onClick={onCancel}>

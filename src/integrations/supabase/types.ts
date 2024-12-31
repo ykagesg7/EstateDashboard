@@ -188,6 +188,8 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
           name: string | null
           price: number
           square_footage: number | null
@@ -201,6 +203,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string | null
           price: number
           square_footage?: number | null
@@ -214,6 +218,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           name?: string | null
           price?: number
           square_footage?: number | null
@@ -250,7 +256,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: {
+          lat1: number
+          lon1: number
+          lat2: number
+          lon2: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
