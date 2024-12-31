@@ -1,15 +1,45 @@
 import { Property } from '@/types/property';
 import L from 'leaflet';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMap, Marker, Popup } from 'react-leaflet';
+import { supabase } from '@/lib/supabase';
 
 interface PropertyMarkerProps {
   property: Property;
   onPropertyClick: (property: Property) => void;
 }
 
+interface GeocodingResult {
+  features: Array<{
+    center: [number, number];
+  }>;
+}
+
 export const PropertyMarker = ({ property, onPropertyClick }: PropertyMarkerProps) => {
   const map = useMap();
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    const getCoordinates = async () => {
+      try {
+        const { data: geocodeData, error } = await supabase.functions.invoke('geocode', {
+          body: { address: property.address }
+        });
+
+        if (error) throw error;
+
+        const result = geocodeData as GeocodingResult;
+        if (result.features && result.features.length > 0) {
+          const [lng, lat] = result.features[0].center;
+          setCoordinates([lat, lng]);
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      }
+    };
+
+    getCoordinates();
+  }, [property.address]);
 
   const markerIcon = L.divIcon({
     className: 'property-marker',
@@ -21,14 +51,16 @@ export const PropertyMarker = ({ property, onPropertyClick }: PropertyMarkerProp
     }"></div>`,
   });
 
+  if (!coordinates) return null;
+
   return (
     <Marker
-      position={[35.6814, 139.7670]} // TODO: Get actual coordinates from geocoding
+      position={coordinates}
       icon={markerIcon}
       eventHandlers={{
         click: () => {
           onPropertyClick(property);
-          map.setView([35.6814, 139.7670], 15);
+          map.setView(coordinates, 15);
         },
       }}
     >
