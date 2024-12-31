@@ -1,57 +1,85 @@
+export interface Property {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+  description: string;
+  price: number;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  square_footage: number;
+  status: '検討中' | '運用中' | '契約済';
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export interface FinancialRecord {
+  id: string;
+  property_id: string;
+  user_id: string;
+  type: string;
+  amount: number;
+  date: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface RentalPlan {
+  id: string;
+  property_id: string;
+  user_id: string;
+  monthly_rent: number;
+  start_date: string;
+  end_date: string | null;
+  created_at: string;
+}
+
+export interface ExpensePlan {
+  id: string;
+  property_id: string;
+  user_id: string;
+  expense_type: string;
+  amount: number;
+  frequency: 'monthly' | 'yearly';
+  start_date: string;
+  end_date: string | null;
+  created_at: string;
+}
+
+export interface MonthlyCashflow {
+  property_id: string;
+  property_name: string;
+  user_id: string;
+  month: string;
+  rental_income: number;
+  expenses: number;
+  net_cashflow: number;
+}
+
+import React from 'react';
+import { PropertyList } from '@/components/properties/PropertyList';
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { PropertyList } from "@/components/properties/PropertyList";
-import { PropertyMap } from "@/components/properties/PropertyMap";
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tables } from "@/integrations/supabase/types";
-type Property = Tables<'properties'>;
+import { supabase } from '@/lib/supabase';
+import { Tables } from '@/integrations/supabase/types';
 
 const Properties = () => {
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-
-  const {
-    data: properties,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["properties"],
+  const { data: properties, isLoading, refetch } = useQuery({
+    queryKey: ['properties'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("properties")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+        .from('properties')
+        .select('*');
+      if (error) {
+        throw error;
+      }
       return data as Property[];
     },
   });
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">物件一覧</h1>
-
-      <Tabs defaultValue="list" className="mb-6">
-        <TabsList>
-          <TabsTrigger value="list">リスト表示</TabsTrigger>
-          <TabsTrigger value="map">マップ表示</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="list">
-        <PropertyList
-          properties={(properties || []).map(prop => ({ ...prop, status: prop.status as "検討中" | "運用中" | "契約済" }))}
-          isLoading={isLoading}
-          onRefresh={() => refetch()}
-        />
-        </TabsContent>
-
-        <TabsContent value="map">
-          <PropertyMap
-            properties={properties || []}
-            onPropertyClick={setSelectedProperty}
-          />
-        </TabsContent>
-      </Tabs>
+    <div>
+      <PropertyList properties={properties || []} isLoading={isLoading} onRefresh={refetch} />
     </div>
   );
 };
