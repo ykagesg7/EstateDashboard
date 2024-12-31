@@ -3,13 +3,19 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import { Property } from '@/types/property';
+import { Tables } from '@/integrations/supabase/types';
+type Property = Tables<'properties'>;
 import { Card } from '../ui/card';
 import { POILayer } from './map/POILayer';
 import { PropertyCluster } from './map/PropertyCluster';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PropertyMapProps {
+  properties: Property[];
+  onPropertyClick?: (property: Property) => void;
+}
+
+interface PropertyClusterProps {
   properties: Property[];
   onPropertyClick?: (property: Property) => void;
 }

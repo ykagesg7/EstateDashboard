@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useMap, LayerGroup, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
-import { Property } from '@/types/property';
+import { Tables } from '@/integrations/supabase/types';
+type Property = Tables<'properties'>;
 
 interface POILayerProps {
   type: 'school' | 'kindergarten' | 'supermarket' | 'station';

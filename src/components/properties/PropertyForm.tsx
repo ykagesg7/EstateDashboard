@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Property } from "@/types/property";
+import { Tables } from "@/integrations/supabase/types";
+type Property = Tables<'properties'>;
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { LocationInput } from "./form/LocationInput";
 
 type PropertyFormData = Omit<Property, "id" | "created_at">;
 

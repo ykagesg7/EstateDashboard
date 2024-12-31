@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import { Property } from '@/types/property';
+import { Tables } from '@/integrations/supabase/types';
+type Property = Tables<'properties'>;
 
 interface PropertyClusterProps {
   properties: Property[];
-  onPropertyClick: (property: Property) => void;
+  onPropertyClick?: (property: Property) => void;
 }
 
 export const PropertyCluster = ({ properties, onPropertyClick }: PropertyClusterProps) => {
