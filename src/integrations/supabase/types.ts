@@ -45,13 +45,6 @@ export type Database = {
             foreignKeyName: "documents_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "monthly_cashflow"
-            referencedColumns: ["property_id"]
-          },
-          {
-            foreignKeyName: "documents_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -103,13 +96,6 @@ export type Database = {
             foreignKeyName: "expense_plans_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "monthly_cashflow"
-            referencedColumns: ["property_id"]
-          },
-          {
-            foreignKeyName: "expense_plans_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -154,13 +140,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "financial_records_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "monthly_cashflow"
-            referencedColumns: ["property_id"]
-          },
           {
             foreignKeyName: "financial_records_property_id_fkey"
             columns: ["property_id"]
@@ -215,13 +194,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "maintenance_records_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "monthly_cashflow"
-            referencedColumns: ["property_id"]
-          },
           {
             foreignKeyName: "maintenance_records_property_id_fkey"
             columns: ["property_id"]
@@ -348,13 +320,6 @@ export type Database = {
             foreignKeyName: "rental_plans_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "monthly_cashflow"
-            referencedColumns: ["property_id"]
-          },
-          {
-            foreignKeyName: "rental_plans_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
@@ -384,26 +349,7 @@ export type Database = {
       }
     }
     Views: {
-      monthly_cashflow: {
-        Row: {
-          expenses: number | null
-          month: string | null
-          net_cashflow: number | null
-          property_id: string | null
-          property_name: string | null
-          rental_income: number | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "properties_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_distance: {

@@ -24,12 +24,16 @@ export const LoginForm = () => {
       });
 
       if (error) {
+        console.error("Login error:", error.message);
         toast({
           variant: "destructive",
           title: "ログインエラー",
           description: error.message,
         });
-      } else if (data.user) {
+        return;
+      }
+
+      if (data.user) {
         toast({
           title: "ログイン成功",
           description: "ダッシュボードにリダイレクトします...",
@@ -37,6 +41,7 @@ export const LoginForm = () => {
         navigate('/properties');
       }
     } catch (error) {
+      console.error("Unexpected error:", error);
       toast({
         variant: "destructive",
         title: "エラー",
@@ -51,19 +56,19 @@ export const LoginForm = () => {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Welcome Back
+          ログイン
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email
+              メールアドレス
             </label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="メールアドレスを入力"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -73,12 +78,12 @@ export const LoginForm = () => {
           </div>
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password
+              パスワード
             </label>
             <Input
               id="password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="パスワードを入力"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -87,7 +92,7 @@ export const LoginForm = () => {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? "ログイン中..." : "ログイン"}
           </Button>
         </form>
       </CardContent>
