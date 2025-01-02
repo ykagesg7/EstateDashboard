@@ -10,13 +10,16 @@ export const SignUpForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
+      console.log("Attempting signup with:", { email, fullName }); // デバッグ用
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -28,25 +31,30 @@ export const SignUpForm = () => {
       });
 
       if (error) {
+        console.error("Signup error:", error); // デバッグ用
         toast({
           variant: "destructive",
           title: "エラー",
           description: error.message,
         });
-      } else {
-        toast({
-          title: "アカウント作成完了",
-          description: "アカウントが作成されました。",
-        });
-        navigate('/properties');
+        return;
       }
+
+      console.log("Signup successful:", data); // デバッグ用
+      toast({
+        title: "アカウント作成完了",
+        description: "アカウントが作成されました。",
+      });
+      navigate('/properties');
     } catch (error) {
-      console.error("予期せぬエラー:", error);
+      console.error("Unexpected error:", error); // デバッグ用
       toast({
         variant: "destructive",
         title: "エラー",
         description: "アカウント作成中にエラーが発生しました。",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -70,6 +78,7 @@ export const SignUpForm = () => {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -83,6 +92,7 @@ export const SignUpForm = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -96,10 +106,11 @@ export const SignUpForm = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full">
-            登録
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "登録中..." : "登録"}
           </Button>
         </form>
       </CardContent>

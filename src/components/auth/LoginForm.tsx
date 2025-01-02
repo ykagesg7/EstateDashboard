@@ -18,13 +18,14 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
+      console.log("Attempting login with:", { email }); // デバッグ用
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Login error:", error.message);
+        console.error("Login error:", error); // デバッグ用
         toast({
           variant: "destructive",
           title: "ログインエラー",
@@ -34,6 +35,7 @@ export const LoginForm = () => {
       }
 
       if (data.user) {
+        console.log("Login successful:", data.user); // デバッグ用
         toast({
           title: "ログイン成功",
           description: "ダッシュボードにリダイレクトします...",
@@ -41,7 +43,7 @@ export const LoginForm = () => {
         navigate('/properties');
       }
     } catch (error) {
-      console.error("Unexpected error:", error);
+      console.error("Unexpected error:", error); // デバッグ用
       toast({
         variant: "destructive",
         title: "エラー",
