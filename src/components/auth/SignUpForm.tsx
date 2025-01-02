@@ -54,7 +54,7 @@ export const SignUpForm = () => {
       console.log("Signup successful:", data);
       toast({
         title: "アカウント作成完了",
-        description: "確認メールを送信しました。メールを確認してアカウントを有効化してください。",
+        description: "アカウント作成が完了しました。",
       });
       navigate('/properties');
     } catch (error) {

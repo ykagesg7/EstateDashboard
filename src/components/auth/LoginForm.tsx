@@ -1,10 +1,12 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabase";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { Label } from '@/components/ui/label';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -12,20 +14,28 @@ export const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { session } = useAuth();
+  const [loginSuccess, setLoginSuccess] = useState(false); // 新しい状態変数
+
+  useEffect(() => {
+    if (session && loginSuccess) {
+      navigate('/properties'); // リダイレクト先を変更
+    }
+  }, [session, navigate, loginSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with:", { email }); // デバッグ用
+      console.log("Attempting login with:", { email });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Login error:", error); // デバッグ用
+        console.error("Login error:", error);
         toast({
           variant: "destructive",
           title: "ログインエラー",
@@ -35,15 +45,15 @@ export const LoginForm = () => {
       }
 
       if (data.user) {
-        console.log("Login successful:", data.user); // デバッグ用
+        console.log("Login successful:", data.user);
         toast({
           title: "ログイン成功",
           description: "ダッシュボードにリダイレクトします...",
         });
-        navigate('/properties');
+        setLoginSuccess(true); // ログイン成功時に true に設定
       }
     } catch (error) {
-      console.error("Unexpected error:", error); // デバッグ用
+      console.error("Unexpected error:", error);
       toast({
         variant: "destructive",
         title: "エラー",
@@ -55,45 +65,36 @@ export const LoginForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">
-          ログイン
-        </CardTitle>
+        <CardTitle>ログイン</CardTitle>
       </CardHeader>
+
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium">
-              メールアドレス
-            </label>
+          <div className="grid gap-2">
+            <Label htmlFor="email">メールアドレス</Label>
             <Input
               id="email"
               type="email"
-              placeholder="メールアドレスを入力"
+              placeholder="メールアドレス"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              autoComplete="email"
-              disabled={isLoading}
             />
           </div>
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              パスワード
-            </label>
+          <div className="grid gap-2">
+            <Label htmlFor="password">パスワード</Label>
             <Input
               id="password"
               type="password"
-              placeholder="パスワードを入力"
+              placeholder="パスワード"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
-              disabled={isLoading}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button disabled={isLoading} type="submit" className="w-full">
             {isLoading ? "ログイン中..." : "ログイン"}
           </Button>
         </form>

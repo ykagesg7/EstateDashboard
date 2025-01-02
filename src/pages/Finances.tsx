@@ -28,18 +28,15 @@ const Finances = () => {
                 レポート
               </TabsTrigger>
             </TabsList>
+            <TabsContent value="cashflow" className="m-0">
+              <CashflowReport />
+            </TabsContent>
+            <TabsContent value="reports" className="m-0">
+              {/* レポート機能は次のフェーズで実装予定 */}
+              <div>レポート機能は開発中です</div>
+            </TabsContent>
           </Tabs>
         </div>
-      </div>
-
-      <div className="space-y-6">
-        <TabsContent value="cashflow" className="m-0">
-          <CashflowReport />
-        </TabsContent>
-        <TabsContent value="reports" className="m-0">
-          {/* レポート機能は次のフェーズで実装予定 */}
-          <div>レポート機能は開発中です</div>
-        </TabsContent>
       </div>
     </div>
   );
