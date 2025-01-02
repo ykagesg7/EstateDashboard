@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Property } from "@/types/property";
 import { PropertyCard } from "./PropertyCard";
 import { PropertyFormDialog } from "./PropertyFormDialog";
+import { PropertyMap } from "./PropertyMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Grid2X2, List, Plus, Trash2 } from "lucide-react";
+import { Grid2X2, List, Map, Plus, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,9 +33,8 @@ interface PropertyListProps {
 }
 
 export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListProps) => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -119,71 +118,90 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
               <SelectItem value="title">タイトル</SelectItem>
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
-          >
-            {viewMode === "grid" ? (
-              <List className="h-4 w-4" />
-            ) : (
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className={viewMode === "grid" ? "bg-accent" : ""}
+            >
               <Grid2X2 className="h-4 w-4" />
-            )}
-          </Button>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className={viewMode === "list" ? "bg-accent" : ""}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setViewMode("map")}
+              className={viewMode === "map" ? "bg-accent" : ""}
+            >
+              <Map className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div
-        className={
-          viewMode === "grid"
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-            : "space-y-4"
-        }
-      >
-        {filteredProperties.map((property) => (
-          <div key={property.id} className="group relative">
-            <PropertyCard property={property} />
-            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="outline"
-                size="icon"
-                className="mr-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedProperty(property);
-                  setIsFormOpen(true);
-                }}
-              >
-                <span className="sr-only">編集</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
+      {viewMode === "map" ? (
+        <PropertyMap properties={filteredProperties} />
+      ) : (
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+              : "space-y-4"
+          }
+        >
+          {filteredProperties.map((property) => (
+            <div key={property.id} className="group relative">
+              <PropertyCard property={property} />
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="mr-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProperty(property);
+                    setIsFormOpen(true);
+                  }}
                 >
-                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                  <path d="m15 5 4 4" />
-                </svg>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPropertyToDelete(property);
-                }}
-              >
-                <span className="sr-only">削除</span>
-                <Trash2 className="h-4 w-4" />
-              </Button>
+                  <span className="sr-only">編集</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setPropertyToDelete(property);
+                  }}
+                >
+                  <span className="sr-only">削除</span>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <PropertyFormDialog
         property={selectedProperty}
