@@ -19,7 +19,7 @@ export const SignUpForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("Attempting signup with:", { email, fullName }); // デバッグ用
+      console.log("Attempting signup with:", { email, fullName });
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -31,7 +31,18 @@ export const SignUpForm = () => {
       });
 
       if (error) {
-        console.error("Signup error:", error); // デバッグ用
+        console.error("Signup error:", error);
+        
+        // Handle rate limit error specifically
+        if (error.status === 429) {
+          toast({
+            variant: "destructive",
+            title: "エラー",
+            description: "登録の試行回数が多すぎます。しばらく時間をおいてから再度お試しください。",
+          });
+          return;
+        }
+
         toast({
           variant: "destructive",
           title: "エラー",
@@ -40,14 +51,14 @@ export const SignUpForm = () => {
         return;
       }
 
-      console.log("Signup successful:", data); // デバッグ用
+      console.log("Signup successful:", data);
       toast({
         title: "アカウント作成完了",
-        description: "アカウントが作成されました。",
+        description: "確認メールを送信しました。メールを確認してアカウントを有効化してください。",
       });
       navigate('/properties');
     } catch (error) {
-      console.error("Unexpected error:", error); // デバッグ用
+      console.error("Unexpected error:", error);
       toast({
         variant: "destructive",
         title: "エラー",
