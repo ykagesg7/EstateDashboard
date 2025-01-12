@@ -5,7 +5,7 @@ import { PropertyFormDialog } from "./PropertyFormDialog";
 import { PropertyMap } from "./PropertyMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Grid2X2, List, Map, Plus, Trash2 } from "lucide-react";
+import { Grid2X2, List, Map, Plus, Share2, Trash2 } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -185,6 +185,22 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
                     <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
                     <path d="m15 5 4 4" />
                   </svg>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="mr-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // 共有機能の実装はこの後行います
+                    toast({
+                      title: "共有機能は準備中です",
+                      description: "もうしばらくお待ちください",
+                    });
+                  }}
+                >
+                  <span className="sr-only">共有</span>
+                  <Share2 className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
