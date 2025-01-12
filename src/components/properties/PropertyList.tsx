@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Property } from "@/types/property";
 import { PropertyCard } from "./PropertyCard";
 import { PropertyFormDialog } from "./PropertyFormDialog";
+import { PropertyInviteDialog } from "./PropertyInviteDialog";
 import { PropertyMap } from "./PropertyMap";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,9 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>();
+  const [propertyToShare, setPropertyToShare] = useState<Property | undefined>();
   const [propertyToDelete, setPropertyToDelete] = useState<Property | undefined>();
 
   const filteredProperties = properties
@@ -192,11 +195,8 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
                   className="mr-2"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // 共有機能の実装はこの後行います
-                    toast({
-                      title: "共有機能は準備中です",
-                      description: "もうしばらくお待ちください",
-                    });
+                    setPropertyToShare(property);
+                    setIsInviteOpen(true);
                   }}
                 >
                   <span className="sr-only">共有</span>
@@ -228,6 +228,17 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
         }}
         onSuccess={onRefresh}
       />
+
+      {propertyToShare && (
+        <PropertyInviteDialog
+          propertyId={propertyToShare.id}
+          isOpen={isInviteOpen}
+          onClose={() => {
+            setIsInviteOpen(false);
+            setPropertyToShare(undefined);
+          }}
+        />
+      )}
 
       <AlertDialog
         open={!!propertyToDelete}
