@@ -232,6 +232,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
       {propertyToShare && (
         <PropertyInviteDialog
           propertyId={propertyToShare.id}
+          propertyName={propertyToShare.name || "未名称の物件"}
           isOpen={isInviteOpen}
           onClose={() => {
             setIsInviteOpen(false);

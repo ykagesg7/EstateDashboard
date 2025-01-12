@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
@@ -30,16 +31,19 @@ type InviteFormValues = z.infer<typeof inviteFormSchema>;
 
 interface PropertyInviteDialogProps {
   propertyId: string;
+  propertyName: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export const PropertyInviteDialog = ({
   propertyId,
+  propertyName,
   isOpen,
   onClose,
 }: PropertyInviteDialogProps) => {
   const { toast } = useToast();
+  const { session } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InviteFormValues>({
@@ -50,17 +54,42 @@ export const PropertyInviteDialog = ({
   });
 
   const onSubmit = async (values: InviteFormValues) => {
+    if (!session?.user) return;
+
     try {
       setIsSubmitting(true);
       
-      const { error } = await supabase
+      // Create invitation record
+      const { data: invitation, error: invitationError } = await supabase
         .from("property_invitations")
         .insert({
           property_id: propertyId,
+          inviter_id: session.user.id,
           invitee_email: values.email,
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (invitationError) throw invitationError;
+
+      // Get inviter's profile
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", session.user.id)
+        .single();
+
+      // Send invitation email
+      const { error: emailError } = await supabase.functions.invoke("send-property-invitation", {
+        body: {
+          invitationId: invitation.id,
+          propertyName,
+          inviteeEmail: values.email,
+          inviterName: profile?.full_name || "ユーザー",
+        },
+      });
+
+      if (emailError) throw emailError;
 
       toast({
         title: "招待を送信しました",
