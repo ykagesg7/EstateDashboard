@@ -12,7 +12,7 @@ export interface Property {
   status: '検討中' | '運用中' | '契約済';
   latitude: number | null;
   longitude: number | null;
-  workspace_id: string;
+  workspace_id: string | null;
 }
 
 export interface FinancialRecord {
