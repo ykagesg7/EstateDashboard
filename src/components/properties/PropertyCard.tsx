@@ -5,16 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import clsx from "clsx";
-import { Link } from "react-router-dom"; // Link コンポーネントをインポート
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PropertyCardProps {
   property: Property;
+  userRole?: string | null;
 }
 
-export const PropertyCard = ({ property }: PropertyCardProps) => {
+export const PropertyCard = ({ property, userRole }: PropertyCardProps) => {
+  const { session } = useAuth();
+  const isOwner = session?.user?.id === property.user_id;
+
   return (
     <Link to={`/properties/${property.id}`}>
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className={userRole && property.user?.role === userRole ? "bg-accent hover:shadow-lg transition-shadow" : "hover:shadow-lg transition-shadow"}>
         <CardHeader>
           <CardTitle className="text-lg">{property.name}</CardTitle>
           <Badge className={clsx(
@@ -33,6 +38,7 @@ export const PropertyCard = ({ property }: PropertyCardProps) => {
             <p className="text-muted-foreground text-sm">{property.address}</p>
             <p className="text-2xl font-bold">{formatCurrency(property.price)}</p>
             <p className="text-sm">{property.description}</p>
+            {isOwner && <p className="text-xs text-gray-400">あなたが作成した物件です</p>}
             <div className="grid grid-cols-3 gap-2">
               <div className="flex items-center gap-1">
                 <BedDouble className="h-4 w-4" />

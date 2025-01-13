@@ -13,6 +13,7 @@ export interface Property {
   latitude: number | null;
   longitude: number | null;
   workspace_id: string | null;
+  user?: { role: string | null;}
 }
 
 export interface Document {

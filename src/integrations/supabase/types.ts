@@ -217,6 +217,7 @@ export type Database = {
           full_name: string | null
           id: string
           updated_at: string | null
+          role: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -224,6 +225,7 @@ export type Database = {
           full_name?: string | null
           id: string
           updated_at?: string | null
+          role?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string | null
+          role?: string | null
         }
         Relationships: []
       }
@@ -596,7 +599,9 @@ export type Tables<
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
+    ? R & {
+        user?: Tables<"profiles">;
+      }
     : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
         PublicSchema["Views"])
@@ -604,7 +609,9 @@ export type Tables<
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
-      ? R
+      ? R & {
+          user?: Tables<"profiles">;
+        }
       : never
     : never
 

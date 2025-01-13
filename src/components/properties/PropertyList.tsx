@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Property } from "@/types/property";
 import { PropertyCard } from "./PropertyCard";
 import { PropertyFormDialog } from "./PropertyFormDialog";
@@ -26,10 +26,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PropertyListProps {
   properties: Property[];
   isLoading: boolean;
+  onDelete: (id: string) => void;
+  isDeleting: boolean;
   onRefresh: () => void;
 }
 
@@ -43,22 +46,46 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
   const [selectedProperty, setSelectedProperty] = useState<Property | undefined>();
   const [propertyToShare, setPropertyToShare] = useState<Property | undefined>();
   const [propertyToDelete, setPropertyToDelete] = useState<Property | undefined>();
+  const { session } = useAuth();
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  const filteredProperties = properties
-    .filter((property) =>
-      property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.address.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price":
-          return Number(b.price) - Number(a.price);
-        case "title":
-          return (a.name || '').localeCompare(b.name || '');
-        default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (session?.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('roll')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching user roll:', profileError);
+        } else {
+          setUserRole(profile?.role || null);
+        }
       }
-    });
+    };
+
+    fetchUserRole();
+  }, [session]);
+
+  const filteredProperties = useMemo(() => {
+    return properties
+      .filter((property) =>
+        property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        property.address.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case "price":
+            return Number(b.price) - Number(a.price);
+          case "title":
+            return (a.name || '').localeCompare(b.name || '');
+          default:
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+      });
+  }, [properties, searchTerm, sortBy]);
 
   const handleDelete = async () => {
     if (!propertyToDelete) return;
@@ -162,7 +189,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
         >
           {filteredProperties.map((property) => (
             <div key={property.id} className="group relative">
-              <PropertyCard property={property} />
+              <PropertyCard property={property} userRole={userRole} />
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="outline"

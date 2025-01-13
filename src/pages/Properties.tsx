@@ -60,11 +60,11 @@ export interface MonthlyCashflow {
 
 import React from 'react';
 import { PropertyList } from '@/components/properties/PropertyList';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from '@/lib/supabase';
 import { Tables } from '@/integrations/supabase/types';
-
 const Properties = () => {
+  const queryClient = useQueryClient();
   const { data: properties, isLoading, refetch } = useQuery({
     queryKey: ['properties'],
     queryFn: async () => {
@@ -78,9 +78,27 @@ const Properties = () => {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('properties').delete().eq('id', id);
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+    },
+  });
+
   return (
     <div>
-      <PropertyList properties={properties || []} isLoading={isLoading} onRefresh={refetch} />
+      <PropertyList
+        properties={properties || []}
+        isLoading={isLoading}
+        onDelete={deleteMutation.mutate}
+        isDeleting={deleteMutation.isPending}
+        onRefresh={refetch}
+      />
     </div>
   );
 };
