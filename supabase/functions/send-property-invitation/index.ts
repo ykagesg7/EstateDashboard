@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -28,22 +28,28 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { invitationId, propertyName, inviteeEmail, inviterName }: EmailRequest = await req.json();
 
-    // Send email using Resend
-    const res = await fetch("https://api.resend.com/emails", {
+    // Send email using Brevo
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
+        "Accept": "application/json",
         "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "api-key": BREVO_API_KEY!,
       },
       body: JSON.stringify({
-        from: "Property Manager <onboarding@resend.dev>",
-        to: [inviteeEmail],
+        sender: {
+          name: "Property Manager",
+          email: "noreply@propertymanager.com"
+        },
+        to: [{
+          email: inviteeEmail,
+        }],
         subject: `${inviterName}さんから物件の共有招待が届いています`,
-        html: `
+        htmlContent: `
           <p>${inviteeEmail}様</p>
           <p>${inviterName}さんから物件「${propertyName}」の共有招待が届いています。</p>
           <p>以下のリンクから招待を承認してください：</p>
-          <a href="${SUPABASE_URL}/accept-invitation?id=${invitationId}">招待を承認する</a>
+          <a href="${SUPABASE_URL}/accept-invitation/${invitationId}">招待を承認する</a>
         `,
       }),
     });
