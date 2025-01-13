@@ -24,12 +24,13 @@ export const CashflowReport = ({ propertyId }: CashflowReportProps) => {
         .from("financial_records")
         .select(`
           property_id,
-          properties:property_id(name),
+          properties:property_id (
+            name
+          ),
           user_id,
-          date as month,
-          amount as rental_income,
-          0 as expenses,
-          amount as net_cashflow
+          date,
+          amount,
+          type
         `)
         .eq('type', 'income')
         .order("date", { ascending: false });
@@ -45,10 +46,10 @@ export const CashflowReport = ({ propertyId }: CashflowReportProps) => {
         property_id: record.property_id,
         property_name: record.properties?.name || 'Unknown',
         user_id: record.user_id,
-        month: record.month,
-        rental_income: record.rental_income,
-        expenses: record.expenses,
-        net_cashflow: record.net_cashflow
+        month: record.date,
+        rental_income: record.amount,
+        expenses: 0, // We'll implement expense calculation in a future update
+        net_cashflow: record.amount // For now, net cashflow equals income since expenses are 0
       })) as MonthlyCashflow[];
     },
   });

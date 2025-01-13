@@ -46,7 +46,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
 
   const filteredProperties = properties
     .filter((property) =>
-      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       property.address.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
@@ -54,7 +54,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
         case "price":
           return Number(b.price) - Number(a.price);
         case "title":
-          return a.name.localeCompare(b.name);
+          return (a.name || '').localeCompare(b.name || '');
         default:
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
