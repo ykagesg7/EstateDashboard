@@ -21,9 +21,18 @@ export const CashflowReport = ({ propertyId }: CashflowReportProps) => {
     queryKey: ["cashflow", propertyId],
     queryFn: async () => {
       let query = supabase
-        .from("monthly_cashflow")
-        .select("*")
-        .order("month", { ascending: false });
+        .from("financial_records")
+        .select(`
+          property_id,
+          properties:property_id(name),
+          user_id,
+          date as month,
+          amount as rental_income,
+          0 as expenses,
+          amount as net_cashflow
+        `)
+        .eq('type', 'income')
+        .order("date", { ascending: false });
 
       if (propertyId) {
         query = query.eq("property_id", propertyId);
@@ -31,7 +40,16 @@ export const CashflowReport = ({ propertyId }: CashflowReportProps) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as MonthlyCashflow[];
+      
+      return data.map(record => ({
+        property_id: record.property_id,
+        property_name: record.properties?.name || 'Unknown',
+        user_id: record.user_id,
+        month: record.month,
+        rental_income: record.rental_income,
+        expenses: record.expenses,
+        net_cashflow: record.net_cashflow
+      })) as MonthlyCashflow[];
     },
   });
 

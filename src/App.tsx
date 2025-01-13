@@ -1,13 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { RequireAuth } from "@/components/auth/RequireAuth";
+import RequireAuth from "@/components/auth/RequireAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Toaster } from "@/components/ui/toaster";
-import { Index } from "@/pages/Index";
-import { Properties } from "@/pages/Properties";
-import { PropertyDetails } from "@/pages/PropertyDetails";
-import { Dashboard } from "@/pages/Dashboard";
-import { Finances } from "@/pages/Finances";
-import { Settings } from "@/pages/Settings";
+import Index from "@/pages/Index";
+import Properties from "@/pages/Properties";
+import PropertyDetails from "@/pages/PropertyDetails";
+import Dashboard from "@/pages/Dashboard";
+import Finances from "@/pages/Finances";
+import Settings from "@/pages/Settings";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
 
 function App() {

@@ -14,8 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PropertyFinancials } from "./PropertyFinancials";
 import { PropertyMaintenance } from "./PropertyMaintenance";
 import { PropertyDocuments } from "./PropertyDocuments";
-// import { dummyMaintenanceRecords } from "@/data/dummyMaintenanceRecords"; // ダミーデータのインポートを削除
-// import { dummyDocuments } from "@/data/dummyDocuments"; // ダミーデータのインポートを削除
 import { PropertySimulation } from "./simulations/PropertySimulation";
 
 const STATUS_OPTIONS = ["検討中", "契約済", "運用中"];
@@ -23,7 +21,7 @@ const CHECKLIST_ITEMS = [
   { id: "condition", label: "物件の状態は良好か" },
   { id: "location", label: "ロケーションは適切か" },
   { id: "price_reasonable", label: "価格は妥当か" },
-  { id: "investment_potential", label: "投資 потенциалはあるか" },
+  { id: "investment_potential", label: "投資ポテンシャルはあるか" },
 ];
 
 interface PropertyDetailProps {
@@ -37,8 +35,6 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [checklist, setChecklist] = useState({});
   const [memo, setMemo] = useState("");
-  // useParams はこのコンポーネントでは不要です。PropertyDetails で取得した id を props で受け取ります。
-  // const { id } = useParams();
 
   useEffect(() => {
     if (propertyId) {
@@ -56,13 +52,16 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
               description: "物件情報の取得に失敗しました",
               variant: "destructive",
             });
-          } else {
-            setProperty(data);
+          } else if (data) {
+            const propertyWithCorrectStatus: Property = {
+              ...data,
+              status: data.status as Property["status"]
+            };
+            setProperty(propertyWithCorrectStatus);
           }
           setIsLoading(false);
         });
 
-      // propertyId が変更された場合に localStorage からデータを取得するように修正
       const fetchLocalStorageData = () => {
         const savedChecklist = localStorage.getItem(`checklist-${propertyId}`);
         const savedMemo = localStorage.getItem(`memo-${propertyId}`);
@@ -76,29 +75,29 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
       }
       fetchLocalStorageData();
     }
-  }, [propertyId]); // 依存配列から id を削除し、propertyId の変更のみを監視
+  }, [propertyId]);
 
   useEffect(() => {
-    if (propertyId) { // propertyId が存在する場合のみ localStorage に保存
+    if (propertyId) {
       localStorage.setItem(`checklist-${propertyId}`, JSON.stringify(checklist));
     }
-  }, [checklist, propertyId]); // 依存配列に propertyId を追加
+  }, [checklist, propertyId]);
 
   useEffect(() => {
-    if (propertyId) { // propertyId が存在する場合のみ localStorage に保存
+    if (propertyId) {
       localStorage.setItem(`memo-${propertyId}`, memo);
     }
-  }, [memo, propertyId]); // 依存配列に propertyId を追加
+  }, [memo, propertyId]);
 
   const handleStatusChange = async (newStatus: Property["status"]) => {
-    if (!property || !propertyId) return; // propertyId が存在するか確認
+    if (!property || !propertyId) return;
 
     setIsUpdating(true);
     try {
       const { error } = await supabase
         .from("properties")
         .update({ status: newStatus })
-        .eq("id", propertyId); // propertyId を使用
+        .eq("id", propertyId);
 
       if (error) throw error;
 
@@ -122,12 +121,6 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
   if (isLoading) return <div>物件情報を読み込み中...</div>;
   if (!property) return <div>物件が見つかりません</div>;
 
-  // ダミーデータのフィルタリングを削除
-  // const maintenanceRecords = dummyMaintenanceRecords.filter(
-  //   (record) => record.property_id === property.id
-  // );
-  // const documents = dummyDocuments.filter((doc) => doc.property_id === property.id);
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -136,35 +129,34 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* 基本情報カード */}
         <Card>
           <CardHeader>
             <CardTitle>基本情報</CardTitle>
-          </CardHeader >
+          </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">住所</p >
+                <p className="text-sm text-muted-foreground">住所</p>
                 <p>{property.address}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">価格</p >
-                <p className="text-xl font-bold">{formatCurrency(property.price)}</p >
+                <p className="text-sm text-muted-foreground">価格</p>
+                <p className="text-xl font-bold">{formatCurrency(property.price)}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">寝室</p >
+                <p className="text-sm text-muted-foreground">寝室</p>
                 <p>{property.bedrooms}部屋</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">バスルーム</p >
+                <p className="text-sm text-muted-foreground">バスルーム</p>
                 <p>{property.bathrooms}部屋</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">面積</p >
+                <p className="text-sm text-muted-foreground">面積</p>
                 <p>{property.square_footage}㎡</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">ステータス</p >
+                <p className="text-sm text-muted-foreground">ステータス</p>
                 <Select
                   value={property.status}
                   onValueChange={(value: Property["status"]) => handleStatusChange(value)}
@@ -172,26 +164,25 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue>{property.status}</SelectValue>
-                  </SelectTrigger >
+                  </SelectTrigger>
                   <SelectContent>
                     {STATUS_OPTIONS.map((status) => (
                       <SelectItem key={status} value={status}>
                         {status}
-                      </SelectItem >
+                      </SelectItem>
                     ))}
-                  </SelectContent >
-                </Select >
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-          </CardContent >
-        </Card >
+          </CardContent>
+        </Card>
 
-        {/* チェックリストとメモカード - 検討中の物件のみ表示 */}
         {property.status === "検討中" && (
           <Card>
             <CardHeader>
               <CardTitle>購入判断チェックリスト</CardTitle>
-            </CardHeader >
+            </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 {CHECKLIST_ITEMS.map((item) => (
@@ -203,12 +194,12 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
                         setChecklist((prev) => ({ ...prev, [item.id]: checked === true }))
                       }
                     />
-                    <Label htmlFor={item.id}>{item.label}</Label >
+                    <Label htmlFor={item.id}>{item.label}</Label>
                   </div>
                 ))}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="memo">メモ</Label >
+                <Label htmlFor="memo">メモ</Label>
                 <Textarea
                   id="memo"
                   value={memo}
@@ -217,32 +208,31 @@ export const PropertyDetail = ({ propertyId }: PropertyDetailProps) => {
                   className="min-h-[100px]"
                 />
               </div>
-            </CardContent >
-          </Card >
+            </CardContent>
+          </Card>
         )}
       </div>
 
-      {/* シミュレーション - 検討中の物件のみ表示 */}
       {property.status === "検討中" && (
         <PropertySimulation propertyPrice={property.price} />
       )}
 
-<Tabs defaultValue="financials">
+      <Tabs defaultValue="financials">
         <TabsList>
-          <TabsTrigger value="financials">財務情報</TabsTrigger >
-          <TabsTrigger value="maintenance">メンテナンス</TabsTrigger >
-          <TabsTrigger value="documents">書類</TabsTrigger >
-        </TabsList >
+          <TabsTrigger value="financials">財務情報</TabsTrigger>
+          <TabsTrigger value="maintenance">メンテナンス</TabsTrigger>
+          <TabsTrigger value="documents">書類</TabsTrigger>
+        </TabsList>
         <TabsContent value="financials">
           {property && <PropertyFinancials propertyId={property.id} />}
-        </TabsContent >
+        </TabsContent>
         <TabsContent value="maintenance">
           {property && <PropertyMaintenance propertyId={property.id} />}
-        </TabsContent >
+        </TabsContent>
         <TabsContent value="documents">
           {property && <PropertyDocuments propertyId={property.id} />}
-        </TabsContent >
-      </Tabs >
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

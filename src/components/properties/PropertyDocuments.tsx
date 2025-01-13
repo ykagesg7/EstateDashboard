@@ -15,7 +15,7 @@ const MAX_FILE_SIZE_MB = 20;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // 20MB
 
 interface PropertyDocumentsProps {
-propertyId: string;
+  propertyId: string;
 }
 
 export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
@@ -35,7 +35,12 @@ export const PropertyDocuments = ({ propertyId }: PropertyDocumentsProps) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Document[];
+      
+      // Transform the data to match the Document type
+      return data.map(doc => ({
+        ...doc,
+        url: doc.file_path // Map file_path to url
+      })) as Document[];
     },
     enabled: !!propertyId,
   });
