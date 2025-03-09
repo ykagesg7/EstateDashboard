@@ -1,68 +1,17 @@
-export interface Property {
-  id: string;
-  user_id: string;
-  name: string;
-  created_at: string;
-  description: string;
-  price: number;
-  address: string;
-  bedrooms: number;
-  bathrooms: number;
-  square_footage: number;
-  status: '検討中' | '運用中' | '契約済';
-  latitude: number | null;
-  longitude: number | null;
-  workspace_id: string | null;
-}
-
-export interface FinancialRecord {
-  id: string;
-  property_id: string;
-  user_id: string;
-  type: string;
-  amount: number;
-  date: string;
-  description: string | null;
-  created_at: string;
-}
-
-export interface RentalPlan {
-  id: string;
-  property_id: string;
-  user_id: string;
-  monthly_rent: number;
-  start_date: string;
-  end_date: string | null;
-  created_at: string;
-}
-
-export interface ExpensePlan {
-  id: string;
-  property_id: string;
-  user_id: string;
-  expense_type: string;
-  amount: number;
-  frequency: 'monthly' | 'yearly';
-  start_date: string;
-  end_date: string | null;
-  created_at: string;
-}
-
-export interface MonthlyCashflow {
-  property_id: string;
-  property_name: string;
-  user_id: string;
-  month: string;
-  rental_income: number;
-  expenses: number;
-  net_cashflow: number;
-}
-
-import React from 'react';
+import React, { useState } from 'react';
 import { PropertyList } from '@/components/properties/PropertyList';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from '@/lib/supabase';
-import { Tables } from '@/integrations/supabase/types';
+import { 
+  Property, 
+  PropertyImage, 
+  FinancialRecord, 
+  RentalPlan, 
+  ExpensePlan, 
+  MonthlyCashflow 
+} from '@/types/property';
+import { useToast } from "@/components/ui/use-toast";
+
 const Properties = () => {
   const queryClient = useQueryClient();
   const { data: properties, isLoading, refetch } = useQuery({
@@ -70,11 +19,31 @@ const Properties = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('properties')
-        .select('*');
+        .select(`
+          *,
+          rental_plans(monthly_rent),
+          expense_plans(amount, frequency),
+          property_images(*)
+        `);
       if (error) {
         throw error;
       }
-      return data as Property[];
+      
+      console.log("Raw data from Supabase:", JSON.stringify(data[0]?.property_images, null, 2));
+      
+      const isPropertyImage = (obj: any): obj is PropertyImage => {
+        return obj && typeof obj === 'object' && 'url' in obj && 'property_id' in obj;
+      };
+      
+      const mappedProperties = data.map(property => ({
+        ...property,
+        images: Array.isArray(property.property_images) 
+          ? property.property_images.filter(isPropertyImage)
+          : []
+      }));
+      
+      console.log("Mapped properties data:", mappedProperties);
+      return mappedProperties as Property[];
     },
   });
 
@@ -90,12 +59,17 @@ const Properties = () => {
     },
   });
 
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
+
   return (
-    <div>
-      <PropertyList
-        properties={properties || []}
-        isLoading={isLoading}
-        onDelete={deleteMutation.mutate}
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-6">物件一覧</h1>
+      <PropertyList 
+        properties={properties || []} 
+        isLoading={isLoading} 
+        onDelete={handleDelete}
         isDeleting={deleteMutation.isPending}
         onRefresh={refetch}
       />

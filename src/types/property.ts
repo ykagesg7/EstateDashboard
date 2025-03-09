@@ -13,7 +13,28 @@ export interface Property {
   latitude: number | null;
   longitude: number | null;
   workspace_id: string | null;
-  user?: { role: string | null;}
+  user?: { role: string | null; }
+  rental_plans?: {
+    monthly_rent: number;
+    start_date?: string;
+    end_date?: string | null;
+  }[];
+  expense_plans?: {
+    amount: number;
+    frequency: 'monthly' | 'yearly';
+    expense_type?: string;
+  }[];
+  images?: PropertyImage[];
+}
+
+export interface PropertyImage {
+  id: string;
+  property_id: string;
+  user_id: string;
+  url: string;
+  thumbnail_url?: string;
+  is_primary: boolean;
+  created_at: string;
 }
 
 export interface Document {

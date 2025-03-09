@@ -35,10 +35,21 @@ const Dashboard = () => {
       return data;
     },
   });
-  if (propertiesLoading || financialsLoading || maintenanceLoading) {
+  const { data: sharedProperties, isLoading: sharedPropertiesLoading } = useQuery({
+    queryKey: ["sharedProperties"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("property_shares")
+        .select("property_id:properties(*)")
+        .eq("user_id", supabase.auth.user()?.id);
+      if (error) throw error;
+      return data?.map(item => item.property_id) as Property[];
+    },
+  });
+  if (propertiesLoading || financialsLoading || maintenanceLoading || sharedPropertiesLoading) {
     return <div>読み込み中...</div>;
   }
-  const totalProperties = properties?.length || 0;
+  const totalProperties = (properties?.length || 0) + (sharedProperties?.length || 0);
   const totalIncome = financials?.reduce((acc, record) => 
     record.type === "income" ? acc + Number(record.amount) : acc, 0) || 0;
   const pendingMaintenance = maintenance?.filter(record => 

@@ -4,89 +4,94 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* プレミアムなカラーパレット */
+    --background: 220 33% 98%;
+    --foreground: 219 50% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 219 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 219 50% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 219 70% 25%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 219 50% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 221 70% 97%;
+    --accent-foreground: 219 50% 22%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 219 70% 35%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* プレミアムなサイドバーカラー */
+    --sidebar: 223 60% 17%;
+    --sidebar-foreground: 220 20% 97%;
+    --sidebar-muted: 223 30% 24%;
+    --sidebar-muted-foreground: 220 15% 80%;
+    --sidebar-accent: 223 44% 22%;
+    --sidebar-accent-foreground: 220 20% 97%;
+    --sidebar-border: 223 30% 24%;
+    --sidebar-ring: 217 80% 69%;
+    
+    /* ゴールドアクセント */
+    --gold: 36 60% 64%;
+    --gold-dark: 36 40% 50%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 224 60% 12%;
+    --foreground: 220 40% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 60% 13%;
+    --card-foreground: 220 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 60% 13%;
+    --popover-foreground: 220 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 216 60% 55%;
+    --primary-foreground: 220 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 224 40% 18%;
+    --secondary-foreground: 220 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 224 40% 18%;
+    --muted-foreground: 220 20% 80%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 224 50% 20%;
+    --accent-foreground: 220 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 220 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 224 40% 20%;
+    --input: 224 40% 20%;
+    --ring: 216 60% 55%;
+
+    /* ダークモードのサイドバー */
+    --sidebar: 223 65% 12%;
+    --sidebar-foreground: 220 40% 98%;
+    --sidebar-muted: 223 40% 20%;
+    --sidebar-muted-foreground: 220 20% 75%;
+    --sidebar-accent: 223 50% 18%;
+    --sidebar-accent-foreground: 220 40% 98%;
+    --sidebar-border: 223 40% 20%;
+    --sidebar-ring: 216 60% 55%;
+    
+    /* ダークモードのゴールドアクセント */
+    --gold: 36 60% 60%;
+    --gold-dark: 36 40% 45%;
   }
 }
 
@@ -95,7 +100,109 @@
     @apply border-border;
   }
 
+  html {
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss03" 1;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss03" 1;
+  }
+
+  /* プレミアムなタイポグラフィ設定 */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+
+  h1 {
+    @apply text-3xl font-semibold;
+  }
+
+  h2 {
+    @apply text-2xl font-medium;
+  }
+
+  h3 {
+    @apply text-xl font-medium;
+  }
+}
+
+/* モバイル対応のスタイル */
+@layer utilities {
+  /* スクロールバーのカスタマイズ */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* タッチ対応のスクロール */
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* レスポンシブテキストサイズ */
+  .text-responsive {
+    font-size: clamp(0.875rem, 4vw, 1rem);
+  }
+  
+  /* セーフエリア対応 */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  /* 高級感を演出するユーティリティクラス */
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+  
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+  
+  /* 微妙なエフェクト */
+  .premium-shadow {
+    box-shadow: 0 4px 20px -2px rgba(19, 26, 53, 0.15);
+  }
+  
+  .premium-card {
+    @apply bg-card rounded-lg border-border premium-shadow transition-all duration-200;
+  }
+  
+  .premium-card:hover {
+    box-shadow: 0 8px 30px -2px rgba(19, 26, 53, 0.18);
+  }
+  
+  /* 上品なアニメーション */
+  .hover-lift {
+    @apply transition-transform duration-300;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* グラデーションアクセント */
+  .premium-gradient {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-dark)) 100%);
+  }
+  
+  .premium-text-gradient {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-dark)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
   }
 }

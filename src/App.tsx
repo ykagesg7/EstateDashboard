@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import RequireAuth from "@/components/auth/RequireAuth";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,12 +7,15 @@ import Properties from "@/pages/Properties";
 import PropertyDetails from "@/pages/PropertyDetails";
 import Dashboard from "@/pages/Dashboard";
 import Finances from "@/pages/Finances";
-import Settings from "@/pages/Settings";
+import Profile from "@/pages/Profile";
 import { AcceptInvitation } from "@/pages/AcceptInvitation";
 
 function App() {
   return (
-    <Router>
+    <Router future={{ 
+      v7_startTransition: true,
+      v7_relativeSplatPath: true 
+    }}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/accept-invitation/:id" element={<AcceptInvitation />} />
@@ -28,7 +31,8 @@ function App() {
           <Route path="properties" element={<Properties />} />
           <Route path="properties/:id" element={<PropertyDetails />} />
           <Route path="finances" element={<Finances />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="settings" element={<Navigate to="/profile" replace />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
       <Toaster />
