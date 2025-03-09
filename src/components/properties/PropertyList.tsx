@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,12 +54,12 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
       if (session?.user) {
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('roll')
+          .select('role')
           .eq('id', session.user.id)
           .single();
 
         if (profileError) {
-          console.error('Error fetching user roll:', profileError);
+          console.error('Error fetching user role:', profileError);
         } else {
           setUserRole(profile?.role || null);
         }
@@ -178,7 +178,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
       </div>
 
       {viewMode === "map" ? (
-        <PropertyMap properties={filteredProperties} />
+        <PropertyMap properties={filteredProperties as any} />
       ) : (
         <div
           className={
@@ -247,7 +247,7 @@ export const PropertyList = ({ properties, isLoading, onRefresh }: PropertyListP
       )}
 
       <PropertyFormDialog
-        property={selectedProperty}
+        property={selectedProperty as any}
         isOpen={isFormOpen}
         onClose={() => {
           setIsFormOpen(false);

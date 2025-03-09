@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Tables } from "@/integrations/supabase/types";
-type Property = Tables<'properties'>;
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,9 +19,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
 import { LocationInput } from "./form/LocationInput";
+import { Separator } from "@/components/ui/separator";
+import { PropertyImage } from "@/types/property";
+import { PropertyImageUpload } from "./PropertyImageUpload";
+
+// エラー回避のためにPropertyを直接定義
+interface Property {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+  description: string;
+  price: number;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  square_footage: number;
+  status: '検討中' | '運用中' | '契約済';
+  latitude: number | null;
+  longitude: number | null;
+  workspace_id: string | null;
+}
 
 type PropertyFormData = Omit<Property, "id" | "created_at">;
 
@@ -37,6 +56,7 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [propertyImages, setPropertyImages] = useState<PropertyImage[]>([]);
 
   const form = useForm<PropertyFormData>({
     defaultValues: property
@@ -78,6 +98,28 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
     checkAuth();
   }, []);
 
+  // 画像の読み込み
+  useEffect(() => {
+    if (property?.id) {
+      const fetchImages = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("property_images")
+            .select("*")
+            .eq("property_id", property.id)
+            .order("created_at", { ascending: false });
+
+          if (error) throw error;
+          setPropertyImages(data || []);
+        } catch (error) {
+          console.error("画像の取得に失敗しました:", error);
+        }
+      };
+      
+      fetchImages();
+    }
+  }, [property?.id]);
+
   if (isUserLoading) {
     return <div>Loading...</div>; // ローディングインジケーター
   }
@@ -102,6 +144,8 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
         user_id: user.id,
       };
 
+      let propertyId = property?.id;
+
       if (property) {
         const { error } = await supabase
           .from("properties")
@@ -114,14 +158,20 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           title: "物件情報を更新しました",
         });
       } else {
-        const { error } = await supabase.from("properties").insert([propertyData]);
+        const { data: newProperty, error } = await supabase
+          .from("properties")
+          .insert([propertyData])
+          .select()
+          .single();
 
         if (error) throw error;
+        propertyId = newProperty.id;
 
         toast({
           title: "物件を登録しました",
         });
       }
+      
       onSuccess();
     } catch (error) {
       console.error("Error saving property:", error);
@@ -133,6 +183,10 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleImagesChange = (images: PropertyImage[]) => {
+    setPropertyImages(images);
   };
 
   return (
@@ -226,7 +280,7 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
             name="square_footage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>面積（㎡）</FormLabel>
+                <FormLabel>床面積 (㎡)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -246,7 +300,10 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           render={({ field }) => (
             <FormItem>
               <FormLabel>ステータス</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="ステータスを選択" />
@@ -268,23 +325,36 @@ export const PropertyForm = ({ property, onSuccess, onCancel }: PropertyFormProp
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>説明</FormLabel>
+              <FormLabel>詳細情報</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea rows={3} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <LocationInput form={form} />
+        <LocationInput
+          form={form}
+        />
 
-        <div className="flex justify-end gap-4">
+        {property?.id && (
+          <>
+            <Separator className="my-6" />
+            <PropertyImageUpload 
+              propertyId={property.id} 
+              existingImages={propertyImages}
+              onImagesChange={handleImagesChange}
+            />
+          </>
+        )}
+
+        <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             キャンセル
           </Button>
           <Button type="submit" disabled={isSubmitting}>
-            {property ? "更新" : "登録"}
+            {isSubmitting ? "保存中..." : property ? "更新" : "登録"}
           </Button>
         </div>
       </form>

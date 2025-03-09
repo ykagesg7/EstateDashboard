@@ -5,8 +5,6 @@ import { UseFormReturn } from "react-hook-form";
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { Tables } from "@/integrations/supabase/types";
-type Property = Tables<'properties'>;
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Selectコンポーネントを追加
 
 // Leaflet のデフォルトマーカーアイコンの問題を修正
@@ -25,6 +23,24 @@ interface LocationInputProps {
 }
 
 export type PropertyFormData = Omit<Property, "id" | "created_at">;
+
+// 代わりに必要な型を直接定義
+interface Property {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+  description: string;
+  price: number;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  square_footage: number;
+  status: '検討中' | '運用中' | '契約済';
+  latitude: number | null;
+  longitude: number | null;
+  workspace_id: string | null;
+}
 
 export const LocationInput = ({ form }: LocationInputProps) => {
   const [position, setPosition] = useState<[number, number] | null>(null);

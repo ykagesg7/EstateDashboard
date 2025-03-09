@@ -1,0 +1,55 @@
+/* EnhancedAvatar コンポーネント用のスタイル */
+
+.enhanced-avatar-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 100%;
+}
+
+.enhanced-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: opacity 0.3s ease;
+}
+
+.enhanced-avatar-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #666;
+  font-weight: 500;
+}
+
+/* アニメーション */
+@keyframes avatar-pulse {
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+.avatar-loading {
+  animation: avatar-pulse 1.5s infinite ease-in-out;
+}
+
+/* CORS問題対応のフォールバック */
+.fallback-avatar {
+  transition: opacity 0.5s ease;
+}
+
+.fallback-avatar img {
+  transform: scale(1.01); /* 境界線がわずかに見えないようにする */
+} 
