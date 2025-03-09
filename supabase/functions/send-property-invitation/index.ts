@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { cors } from '../_shared/cors.js'
+import { supabase } from '../_shared/supabaseClient.js'
 
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -18,59 +18,49 @@ interface EmailRequest {
   inviterName: string;
 }
 
-const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+const authClient = supabase.auth.admin
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: cors })
   }
 
   try {
-    const { invitationId, propertyName, inviteeEmail, inviterName }: EmailRequest = await req.json();
+    const { property_id, invitee_email, role } = await req.json()
 
-    // Send email using Brevo
-    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "api-key": BREVO_API_KEY!,
-      },
-      body: JSON.stringify({
-        sender: {
-          name: "Property Manager",
-          email: "noreply@propertymanager.com"
-        },
-        to: [{
-          email: inviteeEmail,
-        }],
-        subject: `${inviterName}さんから物件の共有招待が届いています`,
-        htmlContent: `
-          <p>${inviteeEmail}様</p>
-          <p>${inviterName}さんから物件「${propertyName}」の共有招待が届いています。</p>
-          <p>以下のリンクから招待を承認してください：</p>
-          <a href="${SUPABASE_URL}/accept-invitation/${invitationId}">招待を承認する</a>
-        `,
-      }),
-    });
+    // 招待されるユーザーのIDを取得
+    const { data: inviteeUser, error: userError } = await authClient.getUserByEmail(invitee_email)
+    if (userError) {
+      return new Response(JSON.stringify({ error: '招待ユーザーが見つかりません' }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+    const invitee_id = inviteeUser.user.id
 
-    if (!res.ok) {
-      throw new Error("Failed to send email");
+    // 招待を作成
+    const { error: invitationError } = await supabase
+      .from('property_shares')
+      .insert({ property_id, user_id: invitee_id, role })
+
+    if (invitationError) {
+      return new Response(JSON.stringify({ error: '招待の作成に失敗しました' }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+        status: 500,
+      })
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error("Error sending invitation email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+      JSON.stringify({ message: '招待を送信しました' }),
+      { headers: { ...cors, 'Content-Type': 'application/json' } }
+    )
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...cors, 'Content-Type': 'application/json' },
+      status: 500,
+    })
   }
-};
+}
 
-serve(handler);
+Deno.serve(handler)
